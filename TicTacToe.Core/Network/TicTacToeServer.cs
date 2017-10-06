@@ -200,7 +200,7 @@ namespace TicTacToe.Core.Network
                         }
                                                                       
 
-                        gameHasEnded = gameEnded(socket, board);
+                        gameHasEnded = gameEnded(board);
 
                         if (gameHasEnded)
                         { 
@@ -209,7 +209,7 @@ namespace TicTacToe.Core.Network
 
                         guessBestMove(board); //Updates the existing board                        
 
-                        gameHasEnded = gameEnded(socket, board);
+                        gameHasEnded = gameEnded(board);
 
                         if (gameHasEnded)
                         {
@@ -234,7 +234,7 @@ namespace TicTacToe.Core.Network
             }
         }
 
-        private bool gameEnded(Socket socket, Board board)
+        private bool gameEnded(Board board)
         {
             if (board.DetectWinner() != BoardSymbol.Blank)
                 return true;
