@@ -38,8 +38,9 @@ namespace TicTacToe.UI.Controls
             startClient();
         }
 
-        public void Reset()
+        public void Reset(BoardSymbol desiredSymbol)
         {
+            _desiredSymbol = desiredSymbol;
             foreach(Control c in this.Controls)
             {
                 if(c is UIButton)

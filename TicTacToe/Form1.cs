@@ -42,7 +42,7 @@ namespace TicTacToe
             writeToServerFile();
             if(_board != null)
             {
-                _board.Reset();
+                _board.Reset(desiredSymbol);
                 return;
             }
             _board = new UI.Controls.UIBoard(_txtIPAddress.Text, desiredSymbol);
