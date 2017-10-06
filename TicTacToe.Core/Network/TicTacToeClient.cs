@@ -61,22 +61,24 @@ namespace TicTacToe.Core.Network
 
                     while(true)
                     {
-                        string receivedBoardAsString = ListenForMessage(socket);
+                        NetworkMessage receivedMessage = new NetworkMessage(ListenForMessage(socket));
 
-                        if(receivedBoardAsString == NetworkMessages.GAME_OVER_CAT_SCRATCH || 
-                            receivedBoardAsString == NetworkMessages.GAME_OVER_O_WINS ||
-                            receivedBoardAsString == NetworkMessages.GAME_OVER_X_WINS)
+
+                        foreach(NetworkMessage m in receivedMessage.Messages)
                         {
-                            triggerGameOver(receivedBoardAsString);
-                            break;
+                            if (m.MessageType == MessageTypes.Board)
+                                triggerBoardReceived(m.Board);
+
+                            if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
+                                triggerGameOver(m.RawMessage);
                         }
 
-                        TicTacToe.Core.Structures.Board board = TicTacToe.Core.Structures.Board.Deserialize(receivedBoardAsString);
-                        triggerBoardReceived(board);
-
-                        if (board.BoardIsCatscratch() || board.DetectWinner() != BoardSymbol.Blank)
+                        if (receivedMessage.MessageContainsGameOverIndicator)
                             break;
 
+
+
+                        ///Waits for user to make their selection.  Times out after 50 * 1000 ms
                         int sleepIterations = 0;
 
                         while(input.CurrentValue == null)
@@ -84,7 +86,7 @@ namespace TicTacToe.Core.Network
                             System.Threading.Thread.Sleep(1000);
                             sleepIterations++;
 
-                            if (sleepIterations > 50)
+                            if (sleepIterations > 60)
                             {
                                 socket.Shutdown(SocketShutdown.Both);
                                 socket.Close();
@@ -92,6 +94,8 @@ namespace TicTacToe.Core.Network
                             }
                                 
                         }
+
+
                         SendMessageThroughSocket(socket, input.CurrentValue.SerializeObject());
                         input.CurrentValue = null;
                         

@@ -16,8 +16,7 @@ namespace TicTacToe.UI.Controls
         TicTacToe.Core.Network.TicTacToeClient _client = null;
         TicTacToe.Core.Network.InputDevice _input = new Core.Network.InputDevice();
 
-        const int BUTTON_HEIGHT = 90;
-        const int BUTTON_WIDTH = 90;
+        
         const int BASE_X = 10;
         const int BASE_Y = 10;
 
@@ -40,9 +39,9 @@ namespace TicTacToe.UI.Controls
         {
             foreach(Control c in this.Controls)
             {
-                if(c is Button)
+                if(c is UIButton)
                 {
-                    ((Button)c).Text = String.Empty;
+                    ((UIButton)c).Reset();
                 }
             }
             this.IsLocked = false;
@@ -75,12 +74,9 @@ namespace TicTacToe.UI.Controls
                 
                 if(targetControl == null || targetControl.Length == 0)
                     throw new KeyNotFoundException();
-                Button targetButton = (Button)targetControl[0];
+                UIButton targetButton = (UIButton)targetControl[0];
 
-                if (board.TileAt(b).Value == BoardSymbol.O)
-                    targetButton.Text = "O";
-                if (board.TileAt(b).Value == BoardSymbol.X)
-                    targetButton.Text = "X";
+                targetButton.SetTextBasedOnSymbol(board.TileAt(b).Value);
             }
 
             this.IsLocked = false;
@@ -94,11 +90,7 @@ namespace TicTacToe.UI.Controls
 
             for(int button = 0; button < 9; button++)
             {
-                Button b = new Button();
-                b.Height = BUTTON_HEIGHT;
-                b.Width = BUTTON_WIDTH;
-                b.Text = String.Empty;
-                b.Name = button.ToString();
+                UIButton b = new UIButton(button);
                 b.Click += (sender2, e2) =>
                 {
                     if (b.Text != String.Empty)

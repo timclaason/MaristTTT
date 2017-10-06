@@ -26,6 +26,8 @@ namespace TicTacToeServer
             startupServer();
         }
 
+        bool _handlersAttached = false;
+
         private void startupServer()
         {
             
@@ -34,19 +36,28 @@ namespace TicTacToeServer
             _backgroundThread.WorkerReportsProgress = true;
             _backgroundThread.DoWork += (sender3, e3) =>
             {
+                if (_handlersAttached == false)
+                {
+                    _server.MessageReceived += (sender2, e2) =>
+                    {
+                        _backgroundThread.ReportProgress(0, "Received: " + sender2.ToString());
+                    };
+                    _server.StartedListening += (sender7, e7) =>
+                        {
+                            _backgroundThread.ReportProgress(0, "Listening: " + sender7.ToString());
+                        }; 
+                    _server.MessageSent += (sender5, e5) =>
+                    {
+                        _backgroundThread.ReportProgress(0, "Sent: " + sender5.ToString());
+                    };
+                    _server.ClientConnected += (sender6, e6) =>
+                    {
+                        _backgroundThread.ReportProgress(0, "Connected: " + sender6.ToString());
+                    };
+                }
 
-                _server.MessageReceived += (sender2, e2) =>
-                {
-                    _backgroundThread.ReportProgress(0, "Received: " + sender2.ToString());
-                };
-                _server.MessageSent += (sender5, e5) =>
-                {
-                    _backgroundThread.ReportProgress(0, "Sent: " + sender5.ToString());
-                };
-                _server.ClientConnected += (sender6, e6) =>
-                {
-                    _backgroundThread.ReportProgress(0, "Connected: " + sender6.ToString());
-                };
+                _handlersAttached = true;
+            
 
 
                 _server.Start();

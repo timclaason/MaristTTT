@@ -12,6 +12,7 @@ namespace TicTacToe.Core.Network
         public event EventHandler MessageReceived;
         public event EventHandler MessageSent;
         public event EventHandler ClientConnected;
+        public event EventHandler StartedListening;
 
         Socket _mainListener;
 
@@ -75,6 +76,9 @@ namespace TicTacToe.Core.Network
 
         public Socket ListenForConnection(Socket listener)
         {
+            if (StartedListening != null)
+                StartedListening("Started listening on " + listener.LocalEndPoint.ToString(), new EventArgs());
+
             Socket socket = listener.Accept();
 
             if (socket.Connected)
@@ -87,6 +91,7 @@ namespace TicTacToe.Core.Network
                     ClientConnected(message, new EventArgs());
                 }
             }
+
             return socket;
 
         }

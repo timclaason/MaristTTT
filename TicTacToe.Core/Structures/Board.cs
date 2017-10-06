@@ -79,6 +79,18 @@ namespace TicTacToe.Core.Structures
 
         }
 
+        public String SerializedString
+        {
+            get
+            {
+                try { return this.SerializeObject(); }
+                catch
+                {
+                    return String.Empty;
+                }
+            }
+        }
+
         public string SerializeObject()
         {
             string returnString = String.Empty;
