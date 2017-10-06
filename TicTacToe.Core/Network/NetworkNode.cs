@@ -53,7 +53,8 @@ namespace TicTacToe.Core.Network
         {
             // Establish the remote endpoint for the socket.  
             // This example uses port 11000 on the local computer.  
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(server);
+            IPHostEntry ipHostInfo = Dns.Resolve(server);
+                //Dns.GetHostEntry(server);
             
             // Dns.Resolve(server);
 
