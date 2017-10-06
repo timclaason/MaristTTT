@@ -10,6 +10,9 @@ namespace TicTacToe.Core.Network
     {
         public static string GAME_REQUEST_TEXT = "<PLAY>";
         public static string CONFIRM_GAME_REQUEST_TEXT = "<ACK>";
+        public static string OFFER_DESIRED_SYMBOL_TEXT = "<WHATCHAWANT>";
+        public static string REQUEST_SYMBOL_X_TEXT = "<X>";
+        public static string REQUEST_SYMBOL_O_TEXT = "<O>";
         public static string INVALID_REQUEST_TEXT = "<INVALID>";
         public static string CLOSING_SOCKET_TEXT = "<BUZZOFF>";
         public static string GAME_OVER_CAT_SCRATCH = "<CATSCRATCH>";

@@ -35,13 +35,17 @@ namespace TicTacToe
 
         private void _btnStart_Click(object sender, EventArgs e)
         {
+            BoardSymbol desiredSymbol = BoardSymbol.X;
+            if (_cmbSymbol.Text == "O")
+                desiredSymbol = BoardSymbol.O;
+
             writeToServerFile();
             if(_board != null)
             {
                 _board.Reset();
                 return;
             }
-            _board = new UI.Controls.UIBoard(_txtIPAddress.Text);
+            _board = new UI.Controls.UIBoard(_txtIPAddress.Text, desiredSymbol);
             this.Controls.Add(_board);
         }
 

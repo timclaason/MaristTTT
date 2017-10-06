@@ -27,10 +27,13 @@ namespace TicTacToe.UI.Controls
 
         string _ipAddress;
 
+        BoardSymbol _desiredSymbol = BoardSymbol.X;
 
-        public UIBoard(string ipAddress)
+
+        public UIBoard(string ipAddress, BoardSymbol desiredSymbol)
         {
             _ipAddress = ipAddress;
+            _desiredSymbol = desiredSymbol;
             initialize();
             startClient();
         }
@@ -97,12 +100,16 @@ namespace TicTacToe.UI.Controls
                         return;
                     if (this.IsLocked)
                         return;
-                    b.Text = "X";
+
+                    if (_desiredSymbol == BoardSymbol.X)
+                        b.Text = "X";
+                    else
+                        b.Text = "O";
                     this.IsLocked = true;
 
                     if(_underlyingBoard != null)
                     {
-                        _underlyingBoard.TileAt(int.Parse(b.Name)).SetValue(BoardSymbol.X);
+                        _underlyingBoard.TileAt(int.Parse(b.Name)).SetValue(_desiredSymbol);
                     }
                     this.IsLocked = true;
                     _input.CurrentValue = _underlyingBoard;
@@ -137,7 +144,7 @@ namespace TicTacToe.UI.Controls
             worker.WorkerReportsProgress = true;
             worker.DoWork += (sender2, e2) =>
             {
-                _client = new TicTacToe.Core.Network.TicTacToeClient();
+                _client = new TicTacToe.Core.Network.TicTacToeClient(_desiredSymbol);
                 _client.NewBoardReceived += (sender3, e3) =>
                 {
                     if (sender3 is Board)

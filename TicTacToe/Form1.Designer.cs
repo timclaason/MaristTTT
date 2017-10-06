@@ -31,6 +31,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this._txtIPAddress = new System.Windows.Forms.TextBox();
             this._btnStart = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this._cmbSymbol = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label1
@@ -44,7 +46,7 @@
             // 
             // _txtIPAddress
             // 
-            this._txtIPAddress.Location = new System.Drawing.Point(69, 332);
+            this._txtIPAddress.Location = new System.Drawing.Point(102, 332);
             this._txtIPAddress.Name = "_txtIPAddress";
             this._txtIPAddress.Size = new System.Drawing.Size(163, 20);
             this._txtIPAddress.TabIndex = 1;
@@ -52,7 +54,7 @@
             // 
             // _btnStart
             // 
-            this._btnStart.Location = new System.Drawing.Point(238, 330);
+            this._btnStart.Location = new System.Drawing.Point(271, 330);
             this._btnStart.Name = "_btnStart";
             this._btnStart.Size = new System.Drawing.Size(75, 23);
             this._btnStart.TabIndex = 2;
@@ -60,11 +62,34 @@
             this._btnStart.UseVisualStyleBackColor = true;
             this._btnStart.Click += new System.EventHandler(this._btnStart_Click);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 364);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(80, 13);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Desired Symbol";
+            // 
+            // _cmbSymbol
+            // 
+            this._cmbSymbol.FormattingEnabled = true;
+            this._cmbSymbol.Items.AddRange(new object[] {
+            "X",
+            "O"});
+            this._cmbSymbol.Location = new System.Drawing.Point(102, 358);
+            this._cmbSymbol.Name = "_cmbSymbol";
+            this._cmbSymbol.Size = new System.Drawing.Size(63, 21);
+            this._cmbSymbol.TabIndex = 4;
+            this._cmbSymbol.Text = "X";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(388, 357);
+            this.ClientSize = new System.Drawing.Size(388, 398);
+            this.Controls.Add(this._cmbSymbol);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this._btnStart);
             this.Controls.Add(this._txtIPAddress);
             this.Controls.Add(this.label1);
@@ -81,6 +106,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox _txtIPAddress;
         private System.Windows.Forms.Button _btnStart;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox _cmbSymbol;
     }
 }
 

@@ -12,6 +12,9 @@ namespace TicTacToe.Core.Network
     {
         public bool GameInProgress = false;
 
+        BoardSymbol _serverSymbol = BoardSymbol.O;
+        BoardSymbol _clientSymbol = BoardSymbol.X;
+        
         private bool performClientHandshake(Socket socket)
         {
             /*
@@ -19,19 +22,43 @@ namespace TicTacToe.Core.Network
              2.  Client sends <PLAY> to server
              3.  Server sends <PLAY> to client
              4.  Client sends <ACK> to server
+             5.  Server sends <WHATCHAWANT> to client
              * */
+
+            ///Client sends <PLAY>
             string gameInitiationMessage = ListenForMessage(socket);
             if (gameInitiationMessage != NetworkMessages.GAME_REQUEST_TEXT)
                 return false;
 
+            ///Server sends <PLAY>
             SendMessageThroughSocket(socket, NetworkMessages.GAME_REQUEST_TEXT);
 
+            ///Client sends <ACK>
             string received = ListenForMessage(socket);
 
             if (received != NetworkMessages.CONFIRM_GAME_REQUEST_TEXT)
             {
                 return false;
             }
+
+            ///Server sends <WHATCHAWANT>
+            SendMessageThroughSocket(socket, NetworkMessages.OFFER_DESIRED_SYMBOL_TEXT);
+
+            ///Client sends either X or O
+            received = ListenForMessage(socket);
+
+            if (received == NetworkMessages.REQUEST_SYMBOL_O_TEXT)
+            {
+                _serverSymbol = BoardSymbol.X;
+                _clientSymbol = BoardSymbol.O;
+            }
+            else
+            {
+                _serverSymbol = BoardSymbol.O;
+                _clientSymbol = BoardSymbol.X;
+            }
+
+
             return true;
         }
 
@@ -52,19 +79,19 @@ namespace TicTacToe.Core.Network
                 BoardTile tile2 = board.TileAt(combo.Position2);
                 BoardTile tile3 = board.TileAt(combo.Position3);
 
-                if (tile1.Value == BoardSymbol.O && tile2.Value == BoardSymbol.O && tile3.Value == BoardSymbol.Blank)
+                if (tile1.Value == _serverSymbol && tile2.Value == _serverSymbol && tile3.Value == BoardSymbol.Blank)
                 {
-                    tile3.SetValue(BoardSymbol.O);
+                    tile3.SetValue(_serverSymbol);
                     return;
                 }
-                if (tile1.Value == BoardSymbol.O && tile3.Value == BoardSymbol.O && tile2.Value == BoardSymbol.Blank)
+                if (tile1.Value == _serverSymbol && tile3.Value == _serverSymbol && tile2.Value == BoardSymbol.Blank)
                 {
-                    tile2.SetValue(BoardSymbol.O);
+                    tile2.SetValue(_serverSymbol);
                     return;
                 }
-                if (tile2.Value == BoardSymbol.O && tile3.Value == BoardSymbol.O && tile1.Value == BoardSymbol.Blank)
+                if (tile2.Value == _serverSymbol && tile3.Value == _serverSymbol && tile1.Value == BoardSymbol.Blank)
                 {
-                    tile1.SetValue(BoardSymbol.O);
+                    tile1.SetValue(_serverSymbol);
                     return;
                 }
             }
@@ -80,28 +107,28 @@ namespace TicTacToe.Core.Network
 
 
                 
-                if (tile1.Value == BoardSymbol.X)
+                if (tile1.Value == _clientSymbol)
                     count++;
-                if (tile2.Value == BoardSymbol.X)
+                if (tile2.Value == _clientSymbol)
                     count++;
-                if (tile3.Value == BoardSymbol.X)
+                if (tile3.Value == _clientSymbol)
                     count++;
 
                 if (count > 1)
                 {
                     if (tile1.Value == BoardSymbol.Blank)
                     {
-                        tile1.SetValue(BoardSymbol.O);
+                        tile1.SetValue(_serverSymbol);
                         return;
                     }
                     if (tile2.Value == BoardSymbol.Blank)
                     {
-                        tile2.SetValue(BoardSymbol.O);
+                        tile2.SetValue(_serverSymbol);
                         return;
                     }
                     if (tile3.Value == BoardSymbol.Blank)
                     {
-                        tile3.SetValue(BoardSymbol.O);
+                        tile3.SetValue(_serverSymbol);
                         return;
                     }
                 }
@@ -118,28 +145,28 @@ namespace TicTacToe.Core.Network
 
                 ///This needs to be smarter...
                 count = 0;
-                if (tile1.Value == BoardSymbol.O || tile1.Value == BoardSymbol.Blank)
+                if (tile1.Value == _serverSymbol || tile1.Value == BoardSymbol.Blank)
                     count++;
-                if (tile2.Value == BoardSymbol.O || tile2.Value == BoardSymbol.Blank)
+                if (tile2.Value == _serverSymbol || tile2.Value == BoardSymbol.Blank)
                     count++;
-                if (tile3.Value == BoardSymbol.O || tile3.Value == BoardSymbol.Blank)
+                if (tile3.Value == _serverSymbol || tile3.Value == BoardSymbol.Blank)
                     count++;
 
                 if(count == 3)
                 {
                     if(tile1.Value == BoardSymbol.Blank)
                     {
-                        tile1.SetValue(BoardSymbol.O);
+                        tile1.SetValue(_serverSymbol);
                         return;
                     }
                     if (tile2.Value == BoardSymbol.Blank)
                     {
-                        tile2.SetValue(BoardSymbol.O);
+                        tile2.SetValue(_serverSymbol);
                         return;
                     }
                     if (tile3.Value == BoardSymbol.Blank)
                     {
-                        tile3.SetValue(BoardSymbol.O);
+                        tile3.SetValue(_serverSymbol);
                         return;
                     }
                 }
@@ -149,7 +176,7 @@ namespace TicTacToe.Core.Network
                     BoardTile tile = board.TileAt(space);
                     if(tile.Value == BoardSymbol.Blank)
                     {
-                        tile.SetValue(BoardSymbol.O);
+                        tile.SetValue(_serverSymbol);
                         return;
                     }
                 }
@@ -188,6 +215,20 @@ namespace TicTacToe.Core.Network
 
                     while (gameHasEnded == false)
                     {
+                        if(_serverSymbol == BoardSymbol.X)
+                        {
+                            System.Threading.Thread.Sleep(500);
+                            guessBestMove(board);                            
+
+                            gameHasEnded = gameEnded(board);
+
+                            if (gameHasEnded)
+                            {
+                                break;
+                            }
+                            sendUpdatedBoard(socket, board);
+                        }
+
                         NetworkMessage userInput = new NetworkMessage(ListenForMessage(socket));
 
                         foreach(NetworkMessage m in userInput.Messages)
@@ -206,6 +247,9 @@ namespace TicTacToe.Core.Network
                         { 
                             break;
                         }
+
+                        if (_serverSymbol == BoardSymbol.X)
+                            continue;
 
                         guessBestMove(board); //Updates the existing board                        
 
@@ -246,12 +290,15 @@ namespace TicTacToe.Core.Network
 
         private void sendGameEndedMessage(Socket socket, Board board)
         {
+            string prepackagedMessage = String.Empty;
             if (board.DetectWinner() == BoardSymbol.O)
-                base.SendMessageThroughSocket(socket, NetworkMessages.GAME_OVER_O_WINS);
+                prepackagedMessage = NetworkMessages.GAME_OVER_O_WINS;
             if (board.DetectWinner() == BoardSymbol.X)
-                base.SendMessageThroughSocket(socket, NetworkMessages.GAME_OVER_X_WINS);
+                prepackagedMessage = NetworkMessages.GAME_OVER_X_WINS;
             if (board.BoardIsCatscratch())
-                base.SendMessageThroughSocket(socket, NetworkMessages.GAME_OVER_CAT_SCRATCH);
+                prepackagedMessage = NetworkMessages.GAME_OVER_CAT_SCRATCH;
+
+            base.SendMessageThroughSocket(socket, NetworkMessage.GetComplexMessage(board, prepackagedMessage));
         }
     }
 }

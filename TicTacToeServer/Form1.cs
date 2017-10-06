@@ -30,7 +30,9 @@ namespace TicTacToeServer
 
         private void startupServer()
         {
-            
+
+
+
             _backgroundThread = new BackgroundWorker();
             _backgroundThread.WorkerSupportsCancellation = true;
             _backgroundThread.WorkerReportsProgress = true;

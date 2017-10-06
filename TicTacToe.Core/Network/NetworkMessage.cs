@@ -11,7 +11,7 @@ namespace TicTacToe.Core.Network
     {
         string _payload;
 
-        const string COMPLEX_SEPARATOR = "@@@@@@@";
+        static string COMPLEX_SEPARATOR = "@@@@@@@";
 
         public NetworkMessage(string message)
         {
@@ -91,6 +91,12 @@ namespace TicTacToe.Core.Network
                     return MessageTypes.Board;
                 return MessageTypes.Message;
             }
+        }
+
+        public static String GetComplexMessage(Board board, string message)
+        {
+            string msg = board.SerializeObject() + COMPLEX_SEPARATOR + message;
+            return msg;
         }
     }
 }
