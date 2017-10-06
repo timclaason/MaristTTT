@@ -87,6 +87,12 @@
       <Name>TicTacToe.UI</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="EXE\TicTacToe.Core.dll" />
+    <Content Include="EXE\TicTacToe.exe" />
+    <Content Include="EXE\TicTacToe.UI.dll" />
+    <Content Include="EXE\TicTacToeServer.exe" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
