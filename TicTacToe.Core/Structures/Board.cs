@@ -14,11 +14,9 @@ namespace TicTacToe.Core.Structures
         const int MIN_TILE = 0;
         const int MAX_TILE = 8;
         public List<BoardTile> Tiles;
-
         static string X_TRANSLATION = "X";
         static string O_TRANSLATION = "O";
         static string BLANK_TRANSLATION = "B";
-
         AllWinningCombinations _winningCombinations = new AllWinningCombinations();
         
         public Board()
@@ -52,7 +50,6 @@ namespace TicTacToe.Core.Structures
 
         }
 
-
         public BoardSymbol DetectWinner()
         {
             foreach(WinningCombination combination in _winningCombinations)
@@ -68,8 +65,7 @@ namespace TicTacToe.Core.Structures
 
             return BoardSymbol.Blank;
         }
-        
-
+      
         public BoardTile TileAt(int index)
         {
             if (index < MIN_TILE || index > MAX_TILE)
@@ -115,9 +111,7 @@ namespace TicTacToe.Core.Structures
 
             return returnString;
         }
-
         
-
         public static Board Deserialize(string input)
         {
             Board returnObject = new Board();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -183,6 +184,98 @@ namespace TicTacToe.Core.Network
             }
         }
 
+        private void spinupGameServerThread(Socket socket)
+        {
+            BackgroundWorker bg = new BackgroundWorker();
+
+            bg.DoWork += (sender, e2) =>
+                {
+                    try
+                    {
+                        bool handshakeOccurred = performClientHandshake(socket);
+
+                        if (!handshakeOccurred)
+                        {
+                            this.CloseSocketConnection(socket, NetworkMessages.CLOSING_SOCKET_TEXT);
+                        }
+
+                        Board board = new Board();
+
+                        sendUpdatedBoard(socket, board);
+
+                        bool gameHasEnded = false;
+
+                        while (gameHasEnded == false)
+                        {
+                            if (_serverSymbol == BoardSymbol.X)
+                            {
+                                System.Threading.Thread.Sleep(500);
+                                guessBestMove(board);
+
+                                gameHasEnded = gameEnded(board);
+
+                                if (gameHasEnded)
+                                {
+                                    break;
+                                }
+                                sendUpdatedBoard(socket, board);
+                            }
+
+                            NetworkMessage userInput = new NetworkMessage(ListenForMessage(socket));
+
+                            foreach (NetworkMessage m in userInput.Messages)
+                            {
+                                if (m.MessageType == MessageTypes.Board)
+                                {
+                                    board = Board.Deserialize(m.RawMessage);
+                                }
+                                ///For now, drop non-board input on the floor
+                            }
+
+
+                            gameHasEnded = gameEnded(board);
+
+                            if (gameHasEnded)
+                            {
+                                break;
+                            }
+
+                            if (_serverSymbol == BoardSymbol.X)
+                                continue;
+
+                            guessBestMove(board); //Updates the existing board                        
+
+                            gameHasEnded = gameEnded(board);
+
+                            if (gameHasEnded)
+                            {
+                                break;
+                            }
+                            sendUpdatedBoard(socket, board);
+                        }
+
+                        sendGameEndedMessage(socket, board);
+                        board = null;
+
+
+                        socket.Shutdown(SocketShutdown.Both);
+                        socket.Close();
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            socket.Shutdown(SocketShutdown.Both);
+                            socket.Close();
+                        }
+                        catch { }
+                        return;
+                    }
+                };
+            bg.RunWorkerAsync();
+
+        }
+
 
         public void Start()
         {
@@ -199,75 +292,7 @@ namespace TicTacToe.Core.Network
                     // Program is suspended while waiting for an incoming connection.
 
                     Socket socket = base.ListenForConnection(listener);
-
-                    bool handshakeOccurred = performClientHandshake(socket);
-
-                    if (!handshakeOccurred)
-                    {
-                        this.CloseSocketConnection(socket, NetworkMessages.CLOSING_SOCKET_TEXT);
-                    }
-
-                    Board board = new Board();
-
-                    sendUpdatedBoard(socket, board);
-
-                    bool gameHasEnded = false;
-
-                    while (gameHasEnded == false)
-                    {
-                        if(_serverSymbol == BoardSymbol.X)
-                        {
-                            System.Threading.Thread.Sleep(500);
-                            guessBestMove(board);                            
-
-                            gameHasEnded = gameEnded(board);
-
-                            if (gameHasEnded)
-                            {
-                                break;
-                            }
-                            sendUpdatedBoard(socket, board);
-                        }
-
-                        NetworkMessage userInput = new NetworkMessage(ListenForMessage(socket));
-
-                        foreach(NetworkMessage m in userInput.Messages)
-                        {
-                            if (m.MessageType == MessageTypes.Board)
-                            {
-                                board = Board.Deserialize(m.RawMessage);
-                            }
-                            ///For now, drop non-board input on the floor
-                        }
-                                                                      
-
-                        gameHasEnded = gameEnded(board);
-
-                        if (gameHasEnded)
-                        { 
-                            break;
-                        }
-
-                        if (_serverSymbol == BoardSymbol.X)
-                            continue;
-
-                        guessBestMove(board); //Updates the existing board                        
-
-                        gameHasEnded = gameEnded(board);
-
-                        if (gameHasEnded)
-                        {
-                            break;
-                        }
-                        sendUpdatedBoard(socket, board);
-                     }
-
-                     sendGameEndedMessage(socket, board);
-                     board = null;
-
-
-                    socket.Shutdown(SocketShutdown.Both);
-                    socket.Close();
+                    spinupGameServerThread(socket);                    
                 }
 
             }
