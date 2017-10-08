@@ -15,7 +15,7 @@ namespace TicTacToe.Core.Network
         {
             try
             {
-                string outputMessage = DateTime.Now.ToString() + "\t" + messageType + ":" + message;
+                string outputMessage = DateTime.Now.ToString() + "\t" + messageType + ":" + message + Environment.NewLine;
                 File.AppendAllText(LOG_FILE, outputMessage);
             }
             catch

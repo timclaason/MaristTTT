@@ -14,7 +14,7 @@ namespace TicTacToeServer
     public partial class Form1 : Form
     {
         BackgroundWorker _backgroundThread = new BackgroundWorker();
-        TicTacToe.Core.Network.TicTacToeServer _server = new TicTacToe.Core.Network.TicTacToeServer();
+        TicTacToe.Core.Network.Server _server = new TicTacToe.Core.Network.Server();
 
         public Form1()
         {

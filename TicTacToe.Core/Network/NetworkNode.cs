@@ -16,6 +16,14 @@ namespace TicTacToe.Core.Network
 
         Socket _mainListener;
 
+        public void CloneHandlers(NetworkNode from, NetworkNode to)
+        {
+            to.MessageReceived += from.MessageReceived;
+            to.MessageSent += from.MessageSent;
+            to.ClientConnected += from.ClientConnected;
+            to.StartedListening += from.StartedListening;
+        }
+
         /// <summary>
         /// As of right now, this only supports IPV4
         /// </summary>

@@ -8,8 +8,8 @@ namespace TicTacToe.Core.Network
 {
     public class NetworkMessages
     {
-        public static string GAME_REQUEST_TEXT = "<PLAY>";
-        public static string CONFIRM_GAME_REQUEST_TEXT = "<ACK>";
+        public static string TICTACTOE_REQUEST_TEXT = "<TICTACTOE>";
+        public static string ACKNOWLEDGE_TEXT = "<ACK>";
         public static string OFFER_DESIRED_SYMBOL_TEXT = "<WHATCHAWANT>";
         public static string REQUEST_SYMBOL_X_TEXT = "<X>";
         public static string REQUEST_SYMBOL_O_TEXT = "<O>";

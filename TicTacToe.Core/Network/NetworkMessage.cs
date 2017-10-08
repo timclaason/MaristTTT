@@ -93,10 +93,30 @@ namespace TicTacToe.Core.Network
             }
         }
 
-        public static String GetComplexMessage(Board board, string message)
+        public static String BuildComplexMessage(Board board, string message)
         {
             string msg = board.SerializeObject() + COMPLEX_SEPARATOR + message;
             return msg;
+        }
+
+        public static String BuildComplexMessage(Board board, List<String> messages)
+        {
+            string returnMessage = board.SerializeObject() + COMPLEX_SEPARATOR + BuildComplexMessage(messages);
+            return returnMessage;
+        }
+
+        public static String BuildComplexMessage(List<String> messages)
+        {
+            string returnMessage = String.Empty;
+
+            for(int i = 0; i < messages.Count; i++)
+            {
+                returnMessage += messages[i];
+
+                if (i < messages.Count - 1)
+                    returnMessage += COMPLEX_SEPARATOR;
+            }
+            return returnMessage;
         }
     }
 }

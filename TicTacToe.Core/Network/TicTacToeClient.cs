@@ -23,13 +23,13 @@ namespace TicTacToe.Core.Network
         private bool performServerHandshake(Socket socket)
         {
             ///Client sends <PLAY>
-            SendMessageThroughSocket(socket, NetworkMessages.GAME_REQUEST_TEXT);
+            SendMessageThroughSocket(socket, NetworkMessages.TICTACTOE_REQUEST_TEXT);
 
             ///Server sends <PLAY>
             string receivedMessage = ListenForMessage(socket);
 
             ///Expectation is that we receive a game request.  If not, die
-            if (receivedMessage != NetworkMessages.GAME_REQUEST_TEXT)
+            if (receivedMessage != NetworkMessages.TICTACTOE_REQUEST_TEXT)
             {
                 if (this.GameOver != null)
                     this.GameOver(new object(), new EventArgs());
@@ -39,7 +39,7 @@ namespace TicTacToe.Core.Network
             }
 
             ///Client sends <ACK>
-            SendMessageThroughSocket(socket, NetworkMessages.CONFIRM_GAME_REQUEST_TEXT);
+            SendMessageThroughSocket(socket, NetworkMessages.ACKNOWLEDGE_TEXT);
 
             ///Server offers symbol selection
             receivedMessage = ListenForMessage(socket);
@@ -134,11 +134,11 @@ namespace TicTacToe.Core.Network
                             System.Threading.Thread.Sleep(1000);
                             sleepIterations++;
 
-                            if (sleepIterations > 60)
+                            if (sleepIterations > 60 * 10) //10 minute timeout
                             {
                                 socket.Shutdown(SocketShutdown.Both);
                                 socket.Close();
-                                break;
+                                return;
                             }
                                 
                         }
