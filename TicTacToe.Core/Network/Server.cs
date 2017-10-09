@@ -18,6 +18,8 @@ namespace TicTacToe.Core.Network
             string gameInitiationMessage = ListenForMessage(socket);
             if (gameInitiationMessage == NetworkMessages.TICTACTOE_REQUEST_TEXT)
                 return ServerApplication.TicTacToe;
+            if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT)
+                return ServerApplication.Info;
 
             return ServerApplication.Invalid;
         }
@@ -45,6 +47,17 @@ namespace TicTacToe.Core.Network
 
                             if(selectedServer == ServerApplication.TicTacToe)
                                 tttServer.Start(socket);
+                        }
+
+                        if(selectedServer == ServerApplication.Info)
+                        {
+                            InfoServer infoServer = new InfoServer();
+                            infoServer.CloneHandlers(this, infoServer);
+                            selectedServer = infoServer.PerformHandshake(socket);
+
+                            if (selectedServer == ServerApplication.Info)
+                                infoServer.Start(socket);
+
                         }
 
                         socket.Shutdown(SocketShutdown.Both);

@@ -9,6 +9,7 @@ namespace TicTacToe.Core.Network
     public class NetworkMessages
     {
         public static string TICTACTOE_REQUEST_TEXT = "<TICTACTOE>";
+        public static string INFO_REQUEST_TEXT = "<INFO>";
         public static string ACKNOWLEDGE_TEXT = "<ACK>";
         public static string OFFER_DESIRED_SYMBOL_TEXT = "<WHATCHAWANT>";
         public static string REQUEST_SYMBOL_X_TEXT = "<X>";
@@ -18,5 +19,8 @@ namespace TicTacToe.Core.Network
         public static string GAME_OVER_CAT_SCRATCH = "<CATSCRATCH>";
         public static string GAME_OVER_X_WINS = "<XWINS>";
         public static string GAME_OVER_O_WINS = "<OWINS>";
+        public static string DISCONNECT_TEXT = "<BYE>";
+
+        public static string REQUEST_INFO_MESSAGE = "<REQUEST>";
     }
 }

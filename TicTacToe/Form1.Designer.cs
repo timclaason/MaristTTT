@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this._txtIPAddress = new System.Windows.Forms.TextBox();
+            this._txtIPAddress = new TicTacToe.UI.Controls.SmartTextBox();
             this._btnStart = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this._cmbSymbol = new System.Windows.Forms.ComboBox();
@@ -104,7 +104,7 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox _txtIPAddress;
+        private TicTacToe.UI.Controls.SmartTextBox _txtIPAddress;
         private System.Windows.Forms.Button _btnStart;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox _cmbSymbol;

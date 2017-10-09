@@ -16,8 +16,7 @@ namespace TicTacToe
     public partial class Form1 : Form
     {
         TicTacToe.UI.Controls.UIBoard _board;
-
-        const string SERVER_FILE_NAME = "TTTServer.txt";
+        
 
         public Form1()
         {
@@ -26,11 +25,8 @@ namespace TicTacToe
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if(File.Exists(SERVER_FILE_NAME))
-            {
-                string contents = File.ReadAllText(SERVER_FILE_NAME);
-                _txtIPAddress.Text = contents;
-            }
+            _txtIPAddress.Recall();
+
         }
 
         private void _btnStart_Click(object sender, EventArgs e)
@@ -39,7 +35,7 @@ namespace TicTacToe
             if (_cmbSymbol.Text == "O")
                 desiredSymbol = BoardSymbol.O;
 
-            writeToServerFile();
+            _txtIPAddress.Remember();
             if(_board != null)
             {
                 _board.Reset(desiredSymbol);
@@ -49,15 +45,7 @@ namespace TicTacToe
             this.Controls.Add(_board);
         }
 
-        private void writeToServerFile()
-        {
-            if(_txtIPAddress.Text != String.Empty)
-            {
-                if (File.Exists(SERVER_FILE_NAME))
-                    File.Delete(SERVER_FILE_NAME);
-                File.WriteAllText(SERVER_FILE_NAME, _txtIPAddress.Text);
-            }
-        }
+        
 
         
     }
