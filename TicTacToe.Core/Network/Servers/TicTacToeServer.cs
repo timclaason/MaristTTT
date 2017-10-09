@@ -63,7 +63,7 @@ namespace TicTacToe.Core.Network.Servers
                 if (_serverSymbol == BoardSymbol.X)
                 {
                     System.Threading.Thread.Sleep(125);
-                    guessBestMove(board);
+                    makeBestMove(board);
 
                     gameHasEnded = gameEnded(board);
 
@@ -81,8 +81,11 @@ namespace TicTacToe.Core.Network.Servers
                     if (m.MessageType == MessageTypes.Board)
                     {
                         board = Board.Deserialize(m.RawMessage);
+                        break;
                     }
                     ///For now, drop non-board input on the floor
+                    ///This logic implies the possibility that the client could send more than 
+                    ///one board.  If this happens, only take the first board in the message
                 }
 
 
@@ -96,7 +99,7 @@ namespace TicTacToe.Core.Network.Servers
                 if (_serverSymbol == BoardSymbol.X)
                     continue;
 
-                guessBestMove(board); //Updates the existing board                        
+                makeBestMove(board); //Updates the existing board                        
 
                 gameHasEnded = gameEnded(board);
 
@@ -121,7 +124,7 @@ namespace TicTacToe.Core.Network.Servers
             return false;
         }
 
-        private void guessBestMove(Board board)
+        private void makeBestMove(Board board)
         {
             AllWinningCombinations allWinningCombos = new AllWinningCombinations();
 

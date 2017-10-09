@@ -75,7 +75,15 @@ namespace TicTacToe.Core.Network
             {
                 if (this.MessageType == MessageTypes.Message)
                     return null;
-                return Board.Deserialize(_payload);
+                if(this.MessageType == MessageTypes.Board)
+                    return Board.Deserialize(_payload);
+
+                foreach(NetworkMessage m in this.Messages)
+                {
+                    if (m.MessageType == MessageTypes.Board)
+                        return m.Board;
+                }
+                return null;
             }
         }
 
