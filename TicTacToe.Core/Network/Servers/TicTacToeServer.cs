@@ -16,7 +16,7 @@ namespace TicTacToe.Core.Network.Servers
         BoardSymbol _serverSymbol = BoardSymbol.O;
         BoardSymbol _clientSymbol = BoardSymbol.X;
 
-        public override ServerApplication PerformHandshake(Socket socket)
+        public override Services PerformHandshake(Socket socket)
         {
             ///Server sends <TICTACTOE>
             SendMessageThroughSocket(socket, NetworkMessages.TICTACTOE_REQUEST_TEXT);
@@ -26,7 +26,7 @@ namespace TicTacToe.Core.Network.Servers
 
             if (received != NetworkMessages.ACKNOWLEDGE_TEXT)
             {
-                return ServerApplication.Invalid;
+                return Services.Invalid;
             }
 
             ///Server sends <WHATCHAWANT>
@@ -47,7 +47,7 @@ namespace TicTacToe.Core.Network.Servers
             }
 
 
-            return ServerApplication.TicTacToe;
+            return Services.TicTacToe;
         }
 
         public override void Start(Socket socket)

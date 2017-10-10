@@ -10,16 +10,16 @@ namespace TicTacToe.Core.Network.Servers
 {
     public class InfoServer : BaseServer
     {
-        public override ServerApplication PerformHandshake(Socket socket)
+        public override Services PerformHandshake(Socket socket)
         {
             try
             {
                 this.SendMessageThroughSocket(socket, NetworkMessages.INFO_REQUEST_TEXT);
-                return ServerApplication.Info;
+                return Services.Info;
             }
             catch
             {
-                return ServerApplication.Invalid;
+                return Services.Invalid;
             }
         }
 

@@ -12,16 +12,15 @@ namespace TicTacToe.Core.Network
 {
     public class Server : NetworkNode
     {
-        private ServerApplication performClientHandshake(Socket socket)
+        private Services detectRequestedService(Socket socket)
         {            
-            ///Client sends <TICTACTOE>
             string gameInitiationMessage = ListenForMessage(socket);
             if (gameInitiationMessage == NetworkMessages.TICTACTOE_REQUEST_TEXT)
-                return ServerApplication.TicTacToe;
+                return Services.TicTacToe;
             if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT)
-                return ServerApplication.Info;
+                return Services.Info;
 
-            return ServerApplication.Invalid;
+            return Services.Invalid;
         }
 
         private void spinupServerThread(Socket socket)
@@ -32,28 +31,24 @@ namespace TicTacToe.Core.Network
                 {
                     try
                     {
-                        ServerApplication selectedServer = performClientHandshake(socket);
-                        BaseServer specializedServer = null;
-
-                        if (selectedServer == ServerApplication.Invalid)
+                        Services selectedService = detectRequestedService(socket);
+                        BaseServer server = null;
+                        
+                        if(selectedService != Services.Invalid)
                         {
-                            this.CloseSocketConnection(socket, NetworkMessages.CLOSING_SOCKET_TEXT);
-                        }
-                        else
-                        {
-                            if (selectedServer == ServerApplication.TicTacToe)
+                            if (selectedService == Services.TicTacToe)
                             {
-                                specializedServer = new TicTacToeServer();
+                                server = new TicTacToeServer();
                             }
-                            else if(selectedServer == ServerApplication.Info)
+                            else if(selectedService == Services.Info)
                             {
-                                specializedServer = new InfoServer();
+                                server = new InfoServer();
                             }
-                            specializedServer.CloneHandlers(this, specializedServer);
-                            selectedServer = specializedServer.PerformHandshake(socket);
+                            server.CloneHandlers(this, server);
+                            selectedService = server.PerformHandshake(socket);
 
-                            if (selectedServer != ServerApplication.Invalid)
-                                specializedServer.Start(socket);
+                            if (selectedService != Services.Invalid)
+                                server.Start(socket);
                         }                        
 
                         socket.Shutdown(SocketShutdown.Both);
@@ -81,13 +76,9 @@ namespace TicTacToe.Core.Network
             try
             {
                 listener.Listen(10);
-
-                // Start listening for connections.
+                                
                 while (true)
                 {
-                    Console.WriteLine("Waiting for a connection...");
-                    // Program is suspended while waiting for an incoming connection.
-
                     Socket socket = base.ListenForConnection(listener);
                     spinupServerThread(socket);                    
                 }
@@ -104,7 +95,7 @@ namespace TicTacToe.Core.Network
     /// <summary>
     /// Types of servers
     /// </summary>
-    public enum ServerApplication
+    public enum Services
     {
         TicTacToe,
         Info,
