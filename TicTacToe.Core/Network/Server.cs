@@ -33,32 +33,28 @@ namespace TicTacToe.Core.Network
                     try
                     {
                         ServerApplication selectedServer = performClientHandshake(socket);
+                        BaseServer specializedServer = null;
 
                         if (selectedServer == ServerApplication.Invalid)
                         {
                             this.CloseSocketConnection(socket, NetworkMessages.CLOSING_SOCKET_TEXT);
                         }
-
-                        if(selectedServer == ServerApplication.TicTacToe)
+                        else
                         {
-                            TicTacToeServer tttServer = new TicTacToeServer();
-                            tttServer.CloneHandlers(this, tttServer);
-                            selectedServer = tttServer.PerformHandshake(socket);
+                            if (selectedServer == ServerApplication.TicTacToe)
+                            {
+                                specializedServer = new TicTacToeServer();
+                            }
+                            else if(selectedServer == ServerApplication.Info)
+                            {
+                                specializedServer = new InfoServer();
+                            }
+                            specializedServer.CloneHandlers(this, specializedServer);
+                            selectedServer = specializedServer.PerformHandshake(socket);
 
-                            if(selectedServer == ServerApplication.TicTacToe)
-                                tttServer.Start(socket);
-                        }
-
-                        if(selectedServer == ServerApplication.Info)
-                        {
-                            InfoServer infoServer = new InfoServer();
-                            infoServer.CloneHandlers(this, infoServer);
-                            selectedServer = infoServer.PerformHandshake(socket);
-
-                            if (selectedServer == ServerApplication.Info)
-                                infoServer.Start(socket);
-
-                        }
+                            if (selectedServer != ServerApplication.Invalid)
+                                specializedServer.Start(socket);
+                        }                        
 
                         socket.Shutdown(SocketShutdown.Both);
                         socket.Close();

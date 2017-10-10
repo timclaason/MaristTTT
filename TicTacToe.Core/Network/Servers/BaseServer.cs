@@ -11,5 +11,7 @@ namespace TicTacToe.Core.Network.Servers
     public abstract class BaseServer : NetworkNode
     {
         public abstract ServerApplication PerformHandshake(Socket socket);
+
+        public abstract void Start(Socket socket);
     }
 }

@@ -50,7 +50,7 @@ namespace TicTacToe.Core.Network.Servers
             return ServerApplication.TicTacToe;
         }
 
-        public void Start(Socket socket)
+        public override void Start(Socket socket)
         {
             Board board = new Board();
 

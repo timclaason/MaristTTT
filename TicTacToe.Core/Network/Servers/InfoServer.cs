@@ -23,7 +23,7 @@ namespace TicTacToe.Core.Network.Servers
             }
         }
 
-        public void Start(Socket socket)
+        public override void Start(Socket socket)
         {
             DateTime initiationTime = DateTime.Now;
 
