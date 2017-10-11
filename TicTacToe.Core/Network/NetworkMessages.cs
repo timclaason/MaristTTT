@@ -24,6 +24,6 @@ namespace TicTacToe.Core.Network
 
         public static string REQUEST_INFO_MESSAGE = "<REQUEST>";
 
-        public static string GENERIC_WEBPAGE_MESSAGE = "<HTML><HEAD><TITLE>Generic</TITLE></HEAD><BODY>Welcome to the (Marist TTT) machine.<br/><br/>I'm sorry I do not have more to say right now.  I am merely a Tic Tac Toe server that has primitive abilities to serve out webpages on the port you requested.  <br/><br/>It is not inconceivable that I will evolve someday, assuming external pressures and my ability to survive in the wilderness; however, this page, along with any insight gleaned from it, is all I have to offer right now.</BODY></HTML>";
+        public static string GENERIC_WEBPAGE_MESSAGE = "<HTML><HEAD><TITLE>Server 42</TITLE></HEAD><BODY>Welcome to the (Marist TTT) machine.<br/><br/>I'm sorry I do not have more to say right now.  I am merely a Tic Tac Toe server that has primitive abilities to serve out webpages on the port you requested.  <br/><br/>It is not inconceivable that I will evolve someday, assuming external pressures and my ability to survive in the wilderness; however, this page, along with unintentional conveyed subtextual insights, is all I have to offer right now.<br/><br/>Sincerely,<br/><br/>Server 42</BODY></HTML>";
     }
 }
