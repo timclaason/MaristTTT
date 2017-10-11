@@ -47,6 +47,7 @@
     <Compile Include="Network\ServerLogger.cs" />
     <Compile Include="Network\Servers\BaseServer.cs" />
     <Compile Include="Network\Servers\InfoServer.cs" />
+    <Compile Include="Network\Servers\SimpleWebServer.cs" />
     <Compile Include="Network\Servers\TicTacToeServer.cs" />
     <Compile Include="Network\TicTacToeClient.cs" />
     <Compile Include="Network\NetworkMessage.cs" />

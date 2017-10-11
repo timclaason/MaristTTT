@@ -19,6 +19,8 @@ namespace TicTacToe.Core.Network
                 return Services.TicTacToe;
             if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT)
                 return Services.Info;
+            if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_TEXT.ToUpper()))
+                return Services.SimpleWeb;
 
             return Services.Invalid;
         }
@@ -43,6 +45,10 @@ namespace TicTacToe.Core.Network
                             else if(selectedService == Services.Info)
                             {
                                 server = new InfoServer();
+                            }
+                            else if(selectedService == Services.SimpleWeb)
+                            {
+                                server = new SimpleWebServer();
                             }
                             server.CloneHandlers(this, server);
                             selectedService = server.PerformHandshake(socket);
@@ -99,6 +105,7 @@ namespace TicTacToe.Core.Network
     {
         TicTacToe,
         Info,
+        SimpleWeb,
         Invalid
     }
 }

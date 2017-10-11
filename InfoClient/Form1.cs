@@ -47,6 +47,10 @@ namespace InfoClient
 
         private void InfoClientForm_Load(object sender, EventArgs e)
         {
+
+
+
+
             _txtIPAddress.Recall();
             _client.MessageReceived += (sender2, e2) =>
             {
