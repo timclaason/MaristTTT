@@ -10,7 +10,9 @@ namespace TicTacToe.Core.Network
     {
         public static string TICTACTOE_REQUEST_TEXT = "<TICTACTOE>";
         public static string INFO_REQUEST_TEXT = "<INFO>";
-        public static string WEB_SERVER_REQUEST_TEXT = "GET / HTTP";
+        public static string WEB_SERVER_REQUEST_TEXT = "GET / HTTP"; //GET /a.html HTTP/1.1
+        public static string WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1 = "HTTP/1.1";
+        public static string WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_2 = "GET";
         public static string ACKNOWLEDGE_TEXT = "<ACK>";
         public static string OFFER_DESIRED_SYMBOL_TEXT = "<WHATCHAWANT>";
         public static string REQUEST_SYMBOL_X_TEXT = "<X>";

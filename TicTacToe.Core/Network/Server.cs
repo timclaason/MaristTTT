@@ -21,7 +21,13 @@ namespace TicTacToe.Core.Network
                 return Services.Info;
             if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_TEXT.ToUpper()))
                 return Services.SimpleWeb;
+            if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()) &&
+                gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()))
+                return Services.SimpleWeb;
+                            //GET /a.html HTTP/1.1
 
+            
+            
             return Services.Invalid;
         }
 

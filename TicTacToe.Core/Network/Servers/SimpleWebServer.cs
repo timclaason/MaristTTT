@@ -13,6 +13,8 @@ namespace TicTacToe.Core.Network.Servers
         const string MIME_HEADER = "text/html";
         const string STATUS_CODE = "202 OK";
 
+        static List<String> _clients;
+
         private string getPageHeader(string pageText)
         {
             byte[] message = Encoding.ASCII.GetBytes(pageText);
@@ -31,23 +33,29 @@ namespace TicTacToe.Core.Network.Servers
 
         private void sendWebpage(Socket socket, string pageText)
         {
-
-            byte[] message = Encoding.ASCII.GetBytes(pageText);
-            int messageLength = message.Length;
-
-            String sendBuffer = getPageHeader(pageText);
-            Byte[] sendBytes = Encoding.ASCII.GetBytes(sendBuffer);
+            String header = getPageHeader(pageText);           
             
-            base.SendMessageThroughSocket(socket, sendBuffer);
+            base.SendMessageThroughSocket(socket, header);
             base.SendMessageThroughSocket(socket, pageText);
 
         }
 
         public override Services PerformHandshake(Socket socket)
         {
+            if (_clients == null)
+                _clients = new List<string>();
+
+            if (_clients.Contains(socket.RemoteEndPoint.ToString()) == false)
+                _clients.Add(socket.RemoteEndPoint.ToString());
+
+            string connectedClients = "<br/><br/>Client requests: <br/>";
+
+            foreach (String c in _clients)
+                connectedClients += c + "<br/>";
+
             try
             {                
-                sendWebpage(socket, NetworkMessages.GENERIC_WEBPAGE_MESSAGE);
+                sendWebpage(socket, NetworkMessages.GENERIC_WEBPAGE_MESSAGE + connectedClients);
                 return Services.SimpleWeb;
             }
             catch
