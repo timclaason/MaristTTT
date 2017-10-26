@@ -12,6 +12,8 @@ namespace TicTacToe.Core.Network
 {
     public class Server : NetworkNode
     {
+        public static TicTacToeGameCollection Games = new TicTacToeGameCollection();
+
         private Services detectRequestedService(Socket socket)
         {            
             string gameInitiationMessage = ListenForMessage(socket);
@@ -66,7 +68,7 @@ namespace TicTacToe.Core.Network
                         socket.Shutdown(SocketShutdown.Both);
                         socket.Close();
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         try
                         {

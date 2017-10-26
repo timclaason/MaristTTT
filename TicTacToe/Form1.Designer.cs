@@ -76,10 +76,11 @@
             this._cmbSymbol.FormattingEnabled = true;
             this._cmbSymbol.Items.AddRange(new object[] {
             "X",
-            "O"});
+            "O",
+            "2PLAYER"});
             this._cmbSymbol.Location = new System.Drawing.Point(102, 358);
             this._cmbSymbol.Name = "_cmbSymbol";
-            this._cmbSymbol.Size = new System.Drawing.Size(63, 21);
+            this._cmbSymbol.Size = new System.Drawing.Size(129, 21);
             this._cmbSymbol.TabIndex = 4;
             this._cmbSymbol.Text = "X";
             // 

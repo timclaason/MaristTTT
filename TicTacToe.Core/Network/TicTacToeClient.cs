@@ -14,10 +14,20 @@ namespace TicTacToe.Core.Network
         public event EventHandler GameOver;
         public event EventHandler NewBoardReceived;
         BoardSymbol _desiredSymbol = BoardSymbol.X;
+        bool _twoPlayer;
 
-        public TicTacToeClient(BoardSymbol desiredSymbol)
+        public TicTacToeClient(BoardSymbol desiredSymbol, bool twoPlayer)
         {
             _desiredSymbol = desiredSymbol;
+            _twoPlayer = twoPlayer;
+        }
+
+        public BoardSymbol DesiredSymbol
+        {
+            get
+            {
+                return _desiredSymbol;
+            }
         }
 
         private bool performServerHandshake(Socket socket)
@@ -47,10 +57,20 @@ namespace TicTacToe.Core.Network
             ///Clent sends desired symbol...
             if (receivedMessage == NetworkMessages.OFFER_DESIRED_SYMBOL_TEXT)
             {
-                if(_desiredSymbol == BoardSymbol.X)
-                    SendMessageThroughSocket(socket, NetworkMessages.REQUEST_SYMBOL_X_TEXT);
-                else
-                    SendMessageThroughSocket(socket, NetworkMessages.REQUEST_SYMBOL_O_TEXT);
+                string messageToSend = NetworkMessages.REQUEST_SYMBOL_X_TEXT;
+                if (_desiredSymbol == BoardSymbol.O)
+                    messageToSend = NetworkMessages.REQUEST_SYMBOL_O_TEXT;
+                if (_twoPlayer)
+                    messageToSend = NetworkMessages.REQUEST_SYMBOL_2_PLAYER;
+                SendMessageThroughSocket(socket, messageToSend);
+
+                string serverResponse = ListenForMessage(socket);
+
+                _desiredSymbol = BoardSymbol.X;
+
+                if (serverResponse == NetworkMessages.REQUEST_SYMBOL_O_TEXT)
+                    _desiredSymbol = BoardSymbol.O;
+                
             }
             else
             {
@@ -92,11 +112,16 @@ namespace TicTacToe.Core.Network
                     bool handshakeSuccess = performServerHandshake(socket);
 
                     int gamePlayIterations = 0;
-
+                    string lastBoardSent = String.Empty;
+                    string lastBoardReceived = String.Empty;
                     while(true)
                     {
                         ///1st one should be the board - 1st message should be an empty board
-                        NetworkMessage receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                        NetworkMessage receivedMessage = null;
+                            //new NetworkMessage(ListenForMessage(socket));
+
+                        if(_twoPlayer || gamePlayIterations > 0)
+                            receivedMessage = new NetworkMessage(ListenForMessage(socket));
 
                         if(_desiredSymbol == BoardSymbol.O && gamePlayIterations == 0)
                         {
@@ -112,17 +137,33 @@ namespace TicTacToe.Core.Network
 
 
 
-                        foreach(NetworkMessage m in receivedMessage.Messages)
+                        if (receivedMessage != null)
                         {
-                            if (m.MessageType == MessageTypes.Board)
-                                triggerBoardReceived(m.Board);
+                            foreach (NetworkMessage m in receivedMessage.Messages)
+                            {
+                                if (m.MessageType == MessageTypes.Board)
+                                {
+                                    triggerBoardReceived(m.Board);
+                                    lastBoardReceived = m.Board.SerializeObject();
+                                }
 
-                            if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
-                                triggerGameOver(m.RawMessage);
+                                if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
+                                    triggerGameOver(m.RawMessage);
+                            }
+
+                            if (receivedMessage.MessageContainsGameOverIndicator)
+                                break;
                         }
 
-                        if (receivedMessage.MessageContainsGameOverIndicator)
-                            break;
+                        if(lastBoardReceived == lastBoardSent && (lastBoardSent != String.Empty || lastBoardReceived != String.Empty))
+                        {
+                            receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                            foreach (NetworkMessage m in receivedMessage.Messages)
+                            {
+                                if (m.MessageType == MessageTypes.Board)
+                                    triggerBoardReceived(m.Board);
+                            }
+                        }
 
 
 
@@ -143,8 +184,9 @@ namespace TicTacToe.Core.Network
                                 
                         }
 
+                        lastBoardSent = input.CurrentValue.SerializeObject();
 
-                        SendMessageThroughSocket(socket, input.CurrentValue.SerializeObject());
+                        SendMessageThroughSocket(socket, lastBoardSent);
                         input.CurrentValue = null;
 
                         gamePlayIterations++;

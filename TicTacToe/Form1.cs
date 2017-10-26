@@ -15,7 +15,7 @@ namespace TicTacToe
 {
     public partial class Form1 : Form
     {
-        TicTacToe.UI.Controls.UIBoard _board;
+        TicTacToe.UI.Controls.UIBoard _uiBoard;
         
 
         public Form1()
@@ -35,14 +35,18 @@ namespace TicTacToe
             if (_cmbSymbol.Text == "O")
                 desiredSymbol = BoardSymbol.O;
 
+            bool twoPlayer = _cmbSymbol.Text.Contains("2");
+            //else if(_cmbSymbol.Text == "2PLAYER")
+            //    desiredSymbol = BoardSymbol.
+
             _txtIPAddress.Remember();
-            if(_board != null)
+            if(_uiBoard != null)
             {
-                _board.Reset(desiredSymbol);
+                _uiBoard.Reset(desiredSymbol);
                 return;
             }
-            _board = new UI.Controls.UIBoard(_txtIPAddress.Text, desiredSymbol);
-            this.Controls.Add(_board);
+            _uiBoard = new UI.Controls.UIBoard(_txtIPAddress.Text, desiredSymbol, twoPlayer);
+            this.Controls.Add(_uiBoard);
         }
 
         

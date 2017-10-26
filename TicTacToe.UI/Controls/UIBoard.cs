@@ -28,12 +28,13 @@ namespace TicTacToe.UI.Controls
         string _ipAddress;
 
         BoardSymbol _desiredSymbol = BoardSymbol.X;
+        bool _twoPlayer = false;
 
-
-        public UIBoard(string ipAddress, BoardSymbol desiredSymbol)
+        public UIBoard(string ipAddress, BoardSymbol desiredSymbol, bool twoPlayer)
         {
             _ipAddress = ipAddress;
             _desiredSymbol = desiredSymbol;
+            _twoPlayer = twoPlayer;
             initialize();
             startClient();
         }
@@ -78,6 +79,7 @@ namespace TicTacToe.UI.Controls
                 
                 if(targetControl == null || targetControl.Length == 0)
                     throw new KeyNotFoundException();
+
                 UIButton targetButton = (UIButton)targetControl[0];
 
                 targetButton.SetTextBasedOnSymbol(board.TileAt(b).Value);
@@ -85,6 +87,22 @@ namespace TicTacToe.UI.Controls
 
             this.IsLocked = false;
             this.Refresh();
+        }
+
+        public bool BoardIsEmpty
+        {
+            get
+            {
+                foreach(Control c in this.Controls)
+                {
+                    if (!(c is UIButton))
+                        continue;
+                    UIButton b = (UIButton)c;
+                    if (b.Text != String.Empty)
+                        return false;
+                }
+                return true;
+            }
         }
 
         private void initialize()
@@ -101,16 +119,23 @@ namespace TicTacToe.UI.Controls
                         return;
                     if (this.IsLocked)
                         return;
+                    if (_client.DesiredSymbol == BoardSymbol.O && this.BoardIsEmpty)
+                        return;
 
-                    if (_desiredSymbol == BoardSymbol.X)
-                        b.Text = "X";
-                    else
-                        b.Text = "O";
+                    b.Text = _client.DesiredSymbol.ToString();
+
+
                     this.IsLocked = true;
+
+                    if(_underlyingBoard == null)
+                    {
+                        _underlyingBoard = new Board();
+                        
+                    }
 
                     if(_underlyingBoard != null)
                     {
-                        _underlyingBoard.TileAt(int.Parse(b.Name)).SetValue(_desiredSymbol);
+                        _underlyingBoard.TileAt(int.Parse(b.Name)).SetValue(_client.DesiredSymbol);
                     }
                     this.IsLocked = true;
                     _input.CurrentValue = _underlyingBoard;
@@ -145,7 +170,7 @@ namespace TicTacToe.UI.Controls
             worker.WorkerReportsProgress = true;
             worker.DoWork += (sender2, e2) =>
             {
-                _client = new TicTacToe.Core.Network.TicTacToeClient(_desiredSymbol);
+                _client = new TicTacToe.Core.Network.TicTacToeClient(_desiredSymbol, _twoPlayer);
                 _client.NewBoardReceived += (sender3, e3) =>
                 {
                     if (sender3 is Board)
