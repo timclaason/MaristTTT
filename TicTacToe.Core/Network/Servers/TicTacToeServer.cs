@@ -147,7 +147,7 @@ namespace TicTacToe.Core.Network.Servers
         }
 
 
-        private void runTwoPlayerGame(Socket socket)
+        private TicTacToeGame runTwoPlayerGame(Socket socket)
         {
             TicTacToeGame game = Server.Games.FindNext(socket);
             _clientSymbol = BoardSymbol.O;
@@ -199,19 +199,22 @@ namespace TicTacToe.Core.Network.Servers
 
             sendGameEndedMessage(socket, game.CurrentBoard);
             sendGameEndedMessage(game.GetOtherPlayer(socket), game.CurrentBoard);
-            game.CurrentBoard = null;
+            
+            return game;
         }
 
         public override void Start(Socket socket)
         {
             if (_isTwoPlayer)
             {
-                runTwoPlayerGame(socket);
+                TicTacToeGame game = runTwoPlayerGame(socket);
+                Server.Games.Kill(game, socket);
             }
             else
             {
-                runOnePlayerGame(socket);
+                runOnePlayerGame(socket);                
             }
+
         }
 
         private bool gameEnded(Board board)

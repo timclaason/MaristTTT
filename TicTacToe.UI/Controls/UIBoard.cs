@@ -41,7 +41,9 @@ namespace TicTacToe.UI.Controls
 
         public void Reset(BoardSymbol desiredSymbol)
         {
+            _underlyingBoard = new Board();
             _desiredSymbol = desiredSymbol;
+            _client.DesiredSymbol = desiredSymbol;
             foreach(Control c in this.Controls)
             {
                 if(c is UIButton)
@@ -171,6 +173,7 @@ namespace TicTacToe.UI.Controls
             worker.DoWork += (sender2, e2) =>
             {
                 _client = new TicTacToe.Core.Network.TicTacToeClient(_desiredSymbol, _twoPlayer);
+                _client.DesiredSymbol = _desiredSymbol;
                 _client.NewBoardReceived += (sender3, e3) =>
                 {
                     if (sender3 is Board)

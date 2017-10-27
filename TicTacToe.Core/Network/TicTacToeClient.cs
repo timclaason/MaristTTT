@@ -28,6 +28,10 @@ namespace TicTacToe.Core.Network
             {
                 return _desiredSymbol;
             }
+            set
+            {
+                _desiredSymbol = value;
+            }
         }
 
         private bool performServerHandshake(Socket socket)
@@ -54,7 +58,7 @@ namespace TicTacToe.Core.Network
             ///Server offers symbol selection
             receivedMessage = ListenForMessage(socket);
 
-            ///Clent sends desired symbol...
+            ///Client sends desired symbol...
             if (receivedMessage == NetworkMessages.OFFER_DESIRED_SYMBOL_TEXT)
             {
                 string messageToSend = NetworkMessages.REQUEST_SYMBOL_X_TEXT;
@@ -63,6 +67,13 @@ namespace TicTacToe.Core.Network
                 if (_twoPlayer)
                     messageToSend = NetworkMessages.REQUEST_SYMBOL_2_PLAYER;
                 SendMessageThroughSocket(socket, messageToSend);
+
+                ///Problem here:  the sequence of messaging has changed (10/25 @ 9:52)
+                ///We get a board, instead of a <X> or <O>
+                ///
+
+                if (!_twoPlayer && _desiredSymbol == BoardSymbol.O)
+                    return true;
 
                 string serverResponse = ListenForMessage(socket);
 
@@ -99,7 +110,176 @@ namespace TicTacToe.Core.Network
                 return;
             NewBoardReceived(message, new EventArgs());
         }
-       
+
+        private void runTwoPlayer(Socket socket, InputDevice input)
+        {
+            string lastBoardSent = String.Empty;
+            string lastBoardReceived = String.Empty;
+            int gamePlayIterations = 0;
+            while (true)
+            {
+                ///1st one should be the board - 1st message should be an empty board
+                NetworkMessage receivedMessage = null;
+                //new NetworkMessage(ListenForMessage(socket));
+
+                if (_twoPlayer || gamePlayIterations > 0)
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+
+                if (_desiredSymbol == BoardSymbol.O && gamePlayIterations == 0)
+                {
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                            triggerBoardReceived(m.Board);
+                    }
+
+                    ///If the user wants to be O, the 2nd message will be another board with 1 space populated
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                }
+
+
+
+                if (receivedMessage != null)
+                {
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                        {
+                            triggerBoardReceived(m.Board);
+                            lastBoardReceived = m.Board.SerializeObject();
+                        }
+
+                        if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
+                            triggerGameOver(m.RawMessage);
+                    }
+
+                    if (receivedMessage.MessageContainsGameOverIndicator)
+                        break;
+                }
+
+                if (lastBoardReceived == lastBoardSent && (lastBoardSent != String.Empty || lastBoardReceived != String.Empty))
+                {
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                            triggerBoardReceived(m.Board);
+                    }
+                }
+
+
+
+                ///Waits for user to make their selection.  Times out after 50 * 1000 ms
+                int sleepIterations = 0;
+
+                while (input.CurrentValue == null)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    sleepIterations++;
+
+                    if (sleepIterations > 60 * 10) //10 minute timeout
+                    {
+                        socket.Shutdown(SocketShutdown.Both);
+                        socket.Close();
+                        return;
+                    }
+
+                }
+
+                lastBoardSent = input.CurrentValue.SerializeObject();
+
+                SendMessageThroughSocket(socket, lastBoardSent);
+                input.CurrentValue = null;
+
+                gamePlayIterations++;
+            }
+        }
+
+        private void runOnePlayer(Socket socket, InputDevice input)
+        {
+            int gamePlayIterations = 0;
+            string lastBoardSent = String.Empty;
+            string lastBoardReceived = String.Empty;
+            while (true)
+            {
+                ///1st one should be the board - 1st message should be an empty board
+                NetworkMessage receivedMessage = null;
+                //new NetworkMessage(ListenForMessage(socket));
+
+                if (_twoPlayer || gamePlayIterations > 0)
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+
+                if (_desiredSymbol == BoardSymbol.O && gamePlayIterations == 0)
+                {
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                            triggerBoardReceived(m.Board);
+                    }
+
+                    ///If the user wants to be O, the 2nd message will be another board with 1 space populated
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                }
+
+
+
+                if (receivedMessage != null)
+                {
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                        {
+                            triggerBoardReceived(m.Board);
+                            lastBoardReceived = m.Board.SerializeObject();
+                        }
+
+                        if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
+                            triggerGameOver(m.RawMessage);
+                    }
+
+                    if (receivedMessage.MessageContainsGameOverIndicator)
+                        break;
+                }
+
+                if (lastBoardReceived == lastBoardSent && (lastBoardSent != String.Empty || lastBoardReceived != String.Empty))
+                {
+                    receivedMessage = new NetworkMessage(ListenForMessage(socket));
+                    foreach (NetworkMessage m in receivedMessage.Messages)
+                    {
+                        if (m.MessageType == MessageTypes.Board)
+                            triggerBoardReceived(m.Board);
+                    }
+                }
+
+
+
+                ///Waits for user to make their selection.  Times out after 50 * 1000 ms
+                int sleepIterations = 0;
+
+                while (input.CurrentValue == null)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    sleepIterations++;
+
+                    if (sleepIterations > 60 * 10) //10 minute timeout
+                    {
+                        socket.Shutdown(SocketShutdown.Both);
+                        socket.Close();
+                        return;
+                    }
+
+                }
+
+                lastBoardSent = input.CurrentValue.SerializeObject();
+
+                SendMessageThroughSocket(socket, lastBoardSent);
+                input.CurrentValue = null;
+
+                gamePlayIterations++;
+            }
+        }
+
         public void Start(string server, InputDevice input)
         {
             try
@@ -110,88 +290,11 @@ namespace TicTacToe.Core.Network
                 {
                     socket = base.GetClientSocket(server, Settings.LISTENING_PORT);
                     bool handshakeSuccess = performServerHandshake(socket);
-
-                    int gamePlayIterations = 0;
-                    string lastBoardSent = String.Empty;
-                    string lastBoardReceived = String.Empty;
-                    while(true)
-                    {
-                        ///1st one should be the board - 1st message should be an empty board
-                        NetworkMessage receivedMessage = null;
-                            //new NetworkMessage(ListenForMessage(socket));
-
-                        if(_twoPlayer || gamePlayIterations > 0)
-                            receivedMessage = new NetworkMessage(ListenForMessage(socket));
-
-                        if(_desiredSymbol == BoardSymbol.O && gamePlayIterations == 0)
-                        {
-                            foreach (NetworkMessage m in receivedMessage.Messages)
-                            {
-                                if (m.MessageType == MessageTypes.Board)
-                                    triggerBoardReceived(m.Board);
-                            }
-
-                            ///If the user wants to be O, the 2nd message will be another board with 1 space populated
-                            receivedMessage = new NetworkMessage(ListenForMessage(socket));
-                        }
-
-
-
-                        if (receivedMessage != null)
-                        {
-                            foreach (NetworkMessage m in receivedMessage.Messages)
-                            {
-                                if (m.MessageType == MessageTypes.Board)
-                                {
-                                    triggerBoardReceived(m.Board);
-                                    lastBoardReceived = m.Board.SerializeObject();
-                                }
-
-                                if (m.MessageType == MessageTypes.Message && m.MessageContainsGameOverIndicator)
-                                    triggerGameOver(m.RawMessage);
-                            }
-
-                            if (receivedMessage.MessageContainsGameOverIndicator)
-                                break;
-                        }
-
-                        if(lastBoardReceived == lastBoardSent && (lastBoardSent != String.Empty || lastBoardReceived != String.Empty))
-                        {
-                            receivedMessage = new NetworkMessage(ListenForMessage(socket));
-                            foreach (NetworkMessage m in receivedMessage.Messages)
-                            {
-                                if (m.MessageType == MessageTypes.Board)
-                                    triggerBoardReceived(m.Board);
-                            }
-                        }
-
-
-
-                        ///Waits for user to make their selection.  Times out after 50 * 1000 ms
-                        int sleepIterations = 0;
-
-                        while(input.CurrentValue == null)
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                            sleepIterations++;
-
-                            if (sleepIterations > 60 * 10) //10 minute timeout
-                            {
-                                socket.Shutdown(SocketShutdown.Both);
-                                socket.Close();
-                                return;
-                            }
-                                
-                        }
-
-                        lastBoardSent = input.CurrentValue.SerializeObject();
-
-                        SendMessageThroughSocket(socket, lastBoardSent);
-                        input.CurrentValue = null;
-
-                        gamePlayIterations++;
-                    }
-
+                                        
+                    if (_twoPlayer)
+                        runTwoPlayer(socket, input);
+                    else
+                        runOnePlayer(socket, input);
 
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
