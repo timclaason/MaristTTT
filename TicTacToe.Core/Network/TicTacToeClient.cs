@@ -47,8 +47,7 @@ namespace TicTacToe.Core.Network
             {
                 if (this.GameOver != null)
                     this.GameOver(new object(), new EventArgs());
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
+				base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
                 return false;
             }
 
@@ -87,8 +86,8 @@ namespace TicTacToe.Core.Network
             {
                 if (this.GameOver != null)
                     this.GameOver(new object(), new EventArgs());
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
+
+				base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
                 return false;
             }
 
@@ -179,8 +178,7 @@ namespace TicTacToe.Core.Network
 
                     if (sleepIterations > 60 * 10) //10 minute timeout
                     {
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Close();
+						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
                         return;
                     }
 
@@ -264,8 +262,7 @@ namespace TicTacToe.Core.Network
 
                     if (sleepIterations > 60 * 10) //10 minute timeout
                     {
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Close();
+						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
                         return;
                     }
 
@@ -296,8 +293,7 @@ namespace TicTacToe.Core.Network
                     else
                         runOnePlayer(socket, input);
 
-                    socket.Shutdown(SocketShutdown.Both);
-                    socket.Close();
+					base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
 
                 }
                 catch (ArgumentNullException ane)

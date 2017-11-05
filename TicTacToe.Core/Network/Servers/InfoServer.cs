@@ -31,6 +31,9 @@ namespace TicTacToe.Core.Network.Servers
             {
                 string rawMessage = ListenForMessage(socket);
 
+                if (rawMessage == Environment.NewLine)
+                    continue;
+
                 TimeSpan lengthOfConnection = DateTime.Now - initiationTime;
 
                 if(lengthOfConnection.TotalHours > 2)

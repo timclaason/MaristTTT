@@ -131,19 +131,26 @@ namespace TicTacToe.Core.Network
 
         public void SendMessageThroughSocket(Socket socket, string message)
         {
-            byte[] msg = Encoding.ASCII.GetBytes(message);
-            socket.Send(msg);
+			try
+			{
+				byte[] msg = Encoding.ASCII.GetBytes(message);
+				socket.Send(msg);
 
-            ServerLogger.WriteToLog("SND", message);
-            if (this.MessageSent != null)
-                MessageSent(message, new EventArgs());
+				ServerLogger.WriteToLog("SND", message);
+				if (this.MessageSent != null)
+					MessageSent(message, new EventArgs());
+			}
+			catch
+			{
+			}
         }
 
         public void CloseSocketConnection(Socket socket, string closeMessage)
         {
             this.SendMessageThroughSocket(socket, closeMessage);
-            socket.Close();
-            ServerLogger.WriteToLog("END", closeMessage);
+			socket.Shutdown(SocketShutdown.Both);
+			socket.Close();
+			ServerLogger.WriteToLog("END", closeMessage);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace TicTacToe.Core.Network
         public static string REQUEST_SYMBOL_2_PLAYER = "<2PLAYER>";
         public static string INVALID_REQUEST_TEXT = "<INVALID>";
         public static string CLOSING_SOCKET_TEXT = "<BUZZOFF>";
+        public static string PUTTY_CONNECTION_TEXT = "SSH-2.0-PuTTY_Release_0.70";
         public static string GAME_OVER_CAT_SCRATCH = "<CATSCRATCH>";
         public static string GAME_OVER_X_WINS = "<XWINS>";
         public static string GAME_OVER_O_WINS = "<OWINS>";

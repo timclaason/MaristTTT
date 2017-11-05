@@ -19,7 +19,7 @@ namespace TicTacToe.Core.Network
             string gameInitiationMessage = ListenForMessage(socket);
             if (gameInitiationMessage == NetworkMessages.TICTACTOE_REQUEST_TEXT)
                 return Services.TicTacToe;
-            if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT)
+            if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT || gameInitiationMessage.Contains(NetworkMessages.PUTTY_CONNECTION_TEXT))
                 return Services.Info;
             if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_TEXT.ToUpper()))
                 return Services.SimpleWeb;
@@ -63,18 +63,17 @@ namespace TicTacToe.Core.Network
 
                             if (selectedService != Services.Invalid)
                                 server.Start(socket);
-                        }                        
+                        }
 
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Close();
-                    }
+						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+						
+					}
                     catch(Exception ex)
                     {
                         try
                         {
-                            socket.Shutdown(SocketShutdown.Both);
-                            socket.Close();
-                        }
+							base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+						}
                         catch { }
                         return;
                     }
