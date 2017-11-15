@@ -13,7 +13,7 @@ namespace TicTacToe.UI.Controls
     public class UIBoard : Panel
     {
         TicTacToe.Core.Structures.Board _underlyingBoard = null;
-        TicTacToe.Core.Network.TicTacToeClient _client = null;
+        TicTacToe.Core.Network.Clients.TicTacToeClient _client = null;
         TicTacToe.Core.Network.InputDevice _input = new Core.Network.InputDevice();
 
         
@@ -39,8 +39,9 @@ namespace TicTacToe.UI.Controls
             startClient();
         }
 
-        public void Reset(BoardSymbol desiredSymbol)
+        public void Reset(BoardSymbol desiredSymbol, bool twoPlayer)
         {
+			_twoPlayer = twoPlayer;
             _underlyingBoard = new Board();
             _desiredSymbol = desiredSymbol;
             _client.DesiredSymbol = desiredSymbol;
@@ -51,10 +52,13 @@ namespace TicTacToe.UI.Controls
                     ((UIButton)c).Reset();
                 }
             }
-            this.IsLocked = false;
+
+
+			this.IsLocked = _twoPlayer;
 
             initialize();
-            startClient();
+			//startClient();
+			_client.Start(_ipAddress, _input);
 
             this.Refresh();
         }
@@ -107,8 +111,15 @@ namespace TicTacToe.UI.Controls
             }
         }
 
+		private bool _buttonHandlersAddded = false;
+
         private void initialize()
         {
+			if (_buttonHandlersAddded)
+				return;
+			
+
+			_buttonHandlersAddded = true;
             this.Width = CONTROL_WIDTH;
             this.Height = CONTROL_HEIGHT;
 
@@ -172,7 +183,7 @@ namespace TicTacToe.UI.Controls
             worker.WorkerReportsProgress = true;
             worker.DoWork += (sender2, e2) =>
             {
-                _client = new TicTacToe.Core.Network.TicTacToeClient(_desiredSymbol, _twoPlayer);
+                _client = new TicTacToe.Core.Network.Clients.TicTacToeClient(_desiredSymbol, _twoPlayer);
                 _client.DesiredSymbol = _desiredSymbol;
                 _client.NewBoardReceived += (sender3, e3) =>
                 {
@@ -180,18 +191,24 @@ namespace TicTacToe.UI.Controls
                     {
                         _underlyingBoard = (TicTacToe.Core.Structures.Board)sender3;
                         worker.ReportProgress(0, sender3);
+						this.IsLocked = false;
                     }
                     if(sender3 is String)
                     {
-                        if(sender3.ToString() == TicTacToe.Core.Network.NetworkMessages.GAME_OVER_CAT_SCRATCH ||
-                            sender3.ToString() == TicTacToe.Core.Network.NetworkMessages.GAME_OVER_O_WINS ||
-                            sender3.ToString() == TicTacToe.Core.Network.NetworkMessages.GAME_OVER_X_WINS
+                        if(sender3.ToString() == TicTacToe.Core.Network.CommonMessages.GAME_OVER_CAT_SCRATCH ||
+                            sender3.ToString() == TicTacToe.Core.Network.CommonMessages.GAME_OVER_O_WINS ||
+                            sender3.ToString() == TicTacToe.Core.Network.CommonMessages.GAME_OVER_X_WINS
                             )
                         MessageBox.Show(sender3.ToString());
                     }
                 };
-                //_client.Start("192.168.1.3", _input);
-                _client.Start(_ipAddress, _input);
+
+				_client.LockSignaled += (sender5, e5) =>
+				{
+					this.IsLocked = true;
+				};
+				//_client.Start("192.168.1.3", _input);
+				_client.Start(_ipAddress, _input);
             };
             worker.ProgressChanged += (sender4, e4) =>
             {
@@ -201,6 +218,8 @@ namespace TicTacToe.UI.Controls
                     this.IsLocked = false;
                 }
             };
+
+
             worker.RunWorkerAsync();
         }
 

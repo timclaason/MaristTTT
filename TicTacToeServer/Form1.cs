@@ -42,19 +42,19 @@ namespace TicTacToeServer
                 {
                     _server.MessageReceived += (sender2, e2) =>
                     {
-                        _backgroundThread.ReportProgress(0, "Received: " + sender2.ToString());
+                        _backgroundThread.ReportProgress(0, Environment.NewLine + "Received: " + Environment.NewLine + "=================================================================" + Environment.NewLine + sender2.ToString() + Environment.NewLine + "=================================================================");
                     };
-                    _server.StartedListening += (sender7, e7) =>
+                    _server.SocketOpened += (sender7, e7) =>
                         {
-                            _backgroundThread.ReportProgress(0, "Listening: " + sender7.ToString());
+                            _backgroundThread.ReportProgress(0, "Socket Opened: " + sender7.ToString());
                         }; 
                     _server.MessageSent += (sender5, e5) =>
                     {
-                        _backgroundThread.ReportProgress(0, "Sent: " + sender5.ToString());
+                        _backgroundThread.ReportProgress(0, Environment.NewLine + "Sent: " + Environment.NewLine + "=================================================================" + Environment.NewLine + sender5.ToString() + Environment.NewLine + "=================================================================");
                     };
                     _server.ClientConnected += (sender6, e6) =>
                     {
-                        _backgroundThread.ReportProgress(0, "Connected: " + sender6.ToString());
+                        _backgroundThread.ReportProgress(0, "Client Connected: " + sender6.ToString());
                     };
                 }
 

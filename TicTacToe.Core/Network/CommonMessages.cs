@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicTacToe.Core.Network
 {
-    public class NetworkMessages
+    public class CommonMessages
     {
         public static string TICTACTOE_REQUEST_TEXT = "<TICTACTOE>";
         public static string INFO_REQUEST_TEXT = "<INFO>";
@@ -27,6 +27,8 @@ namespace TicTacToe.Core.Network
         public static string DISCONNECT_TEXT = "<BYE>";
 
         public static string REQUEST_INFO_MESSAGE = "<REQUEST>";
+
+		public static string LOCK_SIGNAL = "<LOCK>";
 
         public static string GENERIC_WEBPAGE_MESSAGE = "<HTML><HEAD><TITLE>Server 42</TITLE></HEAD><BODY>Welcome to the (Marist TTT) machine.<br/><br/>I'm sorry I do not have more to say right now.  I am merely a Tic Tac Toe server that has primitive abilities to serve out webpages on the port you requested.  <br/><br/>It is not inconceivable that I will evolve someday, assuming external pressures and my ability to survive in the wilderness; however, this page, along with unintentional conveyed subtextual insights, is all I have to offer right now.<br/><br/>Sincerely,<br/><br/>Server 42</BODY></HTML>";
     }

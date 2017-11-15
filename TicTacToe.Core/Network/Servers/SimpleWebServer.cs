@@ -55,7 +55,7 @@ namespace TicTacToe.Core.Network.Servers
 
             try
             {                
-                sendWebpage(socket, NetworkMessages.GENERIC_WEBPAGE_MESSAGE + connectedClients);
+                sendWebpage(socket, CommonMessages.GENERIC_WEBPAGE_MESSAGE + connectedClients);
                 return Services.SimpleWeb;
             }
             catch

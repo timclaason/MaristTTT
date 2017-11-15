@@ -26,6 +26,17 @@ namespace TicTacToe.Core.Network
             }
         }
 
+		public bool AnyMessageContains(string content)
+		{
+			foreach (NetworkMessage m in this.Messages)
+			{
+				if (m.RawMessage.ToUpper().Trim().Contains(content.ToUpper().Trim()))
+					return true;
+			}
+			return false;
+		}
+
+
         public bool MessageContainsGameOverIndicator
         {
             get
@@ -35,9 +46,9 @@ namespace TicTacToe.Core.Network
                     if (m.MessageType != MessageTypes.Message)
                         continue;
 
-                    if (m.RawMessage == NetworkMessages.GAME_OVER_CAT_SCRATCH ||
-                                m.RawMessage == NetworkMessages.GAME_OVER_O_WINS ||
-                                m.RawMessage == NetworkMessages.GAME_OVER_X_WINS)
+                    if (m.RawMessage == CommonMessages.GAME_OVER_CAT_SCRATCH ||
+                                m.RawMessage == CommonMessages.GAME_OVER_O_WINS ||
+                                m.RawMessage == CommonMessages.GAME_OVER_X_WINS)
                         return true;
                 }
                 return false;
@@ -101,7 +112,16 @@ namespace TicTacToe.Core.Network
             }
         }
 
-        public static String BuildComplexMessage(Board board, string message)
+		public static String BuildComplexMessage(string message1, string message2)
+		{
+			List<String> messages = new List<string>();
+			messages.Add(message1);
+			messages.Add(message2);
+
+			return BuildComplexMessage(messages);
+		}
+
+		public static String BuildComplexMessage(Board board, string message)
         {
             string msg = board.SerializeObject() + COMPLEX_SEPARATOR + message;
             return msg;

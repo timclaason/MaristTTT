@@ -36,15 +36,26 @@ namespace TicTacToe
                 desiredSymbol = BoardSymbol.O;
 
             bool twoPlayer = _cmbSymbol.Text.Contains("2");
-            //else if(_cmbSymbol.Text == "2PLAYER")
-            //    desiredSymbol = BoardSymbol.
+            
 
             _txtIPAddress.Remember();
+
+			_uiBoard = null;
+			foreach (Control c in this.Controls)
+			{
+				if (!(c is UI.Controls.UIBoard))
+					continue;
+				this.Controls.Remove(c);
+			}
+			this.Refresh();
+
+			/*
             if(_uiBoard != null)
             {
-                _uiBoard.Reset(desiredSymbol);
+                _uiBoard.Reset(desiredSymbol, twoPlayer);
                 return;
             }
+			*/
             _uiBoard = new UI.Controls.UIBoard(_txtIPAddress.Text, desiredSymbol, twoPlayer);
             this.Controls.Add(_uiBoard);
         }

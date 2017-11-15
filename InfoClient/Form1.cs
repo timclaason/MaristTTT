@@ -15,7 +15,7 @@ namespace InfoClient
     public partial class InfoClientForm : Form
     {
         bool _connected = false;
-        TicTacToe.Core.Network.InfoClient _client = new TicTacToe.Core.Network.InfoClient();
+        TicTacToe.Core.Network.Clients.InfoClient _client = new TicTacToe.Core.Network.Clients.InfoClient();
 
         public InfoClientForm()
         {

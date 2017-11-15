@@ -14,7 +14,7 @@ namespace TicTacToe.Core.Network.Servers
         {
             try
             {
-                this.SendMessageThroughSocket(socket, NetworkMessages.INFO_REQUEST_TEXT);
+                this.SendMessageThroughSocket(socket, CommonMessages.INFO_REQUEST_TEXT);
                 return Services.Info;
             }
             catch
@@ -38,21 +38,21 @@ namespace TicTacToe.Core.Network.Servers
 
                 if(lengthOfConnection.TotalHours > 2)
                 {
-                    SendMessageThroughSocket(socket, NetworkMessages.DISCONNECT_TEXT);
+                    SendMessageThroughSocket(socket, CommonMessages.DISCONNECT_TEXT);
                     break;
                 }
                 
                 NetworkMessage message = new NetworkMessage(rawMessage);
 
-                if(message.RawMessage.Contains(NetworkMessages.DISCONNECT_TEXT))
+                if(message.RawMessage.Contains(CommonMessages.DISCONNECT_TEXT))
                 {
-                    SendMessageThroughSocket(socket, NetworkMessages.DISCONNECT_TEXT);
+                    SendMessageThroughSocket(socket, CommonMessages.DISCONNECT_TEXT);
                     break;
                 }
 
                 if (message.MessageType == MessageTypes.Board || message.MessageType == MessageTypes.Message)
                 {
-                    SendMessageThroughSocket(socket, NetworkMessages.INVALID_REQUEST_TEXT);
+                    SendMessageThroughSocket(socket, CommonMessages.INVALID_REQUEST_TEXT);
                     continue;
                 }
 
@@ -74,18 +74,18 @@ namespace TicTacToe.Core.Network.Servers
         {
             if(message.MessageType != MessageTypes.Complex)
             {
-                SendMessageThroughSocket(socket, NetworkMessages.INVALID_REQUEST_TEXT);
+                SendMessageThroughSocket(socket, CommonMessages.INVALID_REQUEST_TEXT);
                 return;
             }
 
             if(message.Messages.Count < 2)
             {
-                SendMessageThroughSocket(socket, NetworkMessages.INVALID_REQUEST_TEXT);
+                SendMessageThroughSocket(socket, CommonMessages.INVALID_REQUEST_TEXT);
                 return;
             }
-            if(message.Messages[0].RawMessage != NetworkMessages.REQUEST_INFO_MESSAGE)
+            if(message.Messages[0].RawMessage != CommonMessages.REQUEST_INFO_MESSAGE)
             {
-                SendMessageThroughSocket(socket, NetworkMessages.INVALID_REQUEST_TEXT);
+                SendMessageThroughSocket(socket, CommonMessages.INVALID_REQUEST_TEXT);
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace TicTacToe.Core.Network.Servers
                 SendMessageThroughSocket(socket, DateTime.Now.Year.ToString());
                 return;
             }
-            SendMessageThroughSocket(socket, NetworkMessages.INVALID_REQUEST_TEXT);
+            SendMessageThroughSocket(socket, CommonMessages.INVALID_REQUEST_TEXT);
         }
 
 

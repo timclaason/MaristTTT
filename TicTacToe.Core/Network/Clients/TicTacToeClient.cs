@@ -7,17 +7,26 @@ using System.Net;
 using System.Net.Sockets;
 using TicTacToe.Core.Structures;
 
-namespace TicTacToe.Core.Network
+namespace TicTacToe.Core.Network.Clients
 {
-    public class TicTacToeClient : NetworkNode
+    public class TicTacToeClient : Client
     {
         public event EventHandler GameOver;
         public event EventHandler NewBoardReceived;
+		public event EventHandler LockSignaled;
         BoardSymbol _desiredSymbol = BoardSymbol.X;
         bool _twoPlayer;
 
+
+
         public TicTacToeClient(BoardSymbol desiredSymbol, bool twoPlayer)
         {
+			this.MessageReceived += (sender2, e2) =>
+			{
+				if (sender2.ToString().Contains(CommonMessages.LOCK_SIGNAL))
+					this.LockSignaled(sender2, e2);
+			};
+
             _desiredSymbol = desiredSymbol;
             _twoPlayer = twoPlayer;
         }
@@ -36,35 +45,41 @@ namespace TicTacToe.Core.Network
 
         private bool performServerHandshake(Socket socket)
         {
-            ///Client sends <PLAY>
-            SendMessageThroughSocket(socket, NetworkMessages.TICTACTOE_REQUEST_TEXT);
+			///Client sends <PLAY>
+			///
+			string twoPlayerInitiationMessage = NetworkMessage.BuildComplexMessage(CommonMessages.TICTACTOE_REQUEST_TEXT, CommonMessages.REQUEST_SYMBOL_2_PLAYER);
+
+			if(_twoPlayer)
+				SendMessageThroughSocket(socket, twoPlayerInitiationMessage);
+			else
+				SendMessageThroughSocket(socket, CommonMessages.TICTACTOE_REQUEST_TEXT);
 
             ///Server sends <PLAY>
             string receivedMessage = ListenForMessage(socket);
 
             ///Expectation is that we receive a game request.  If not, die
-            if (receivedMessage != NetworkMessages.TICTACTOE_REQUEST_TEXT)
+            if (receivedMessage != CommonMessages.TICTACTOE_REQUEST_TEXT)
             {
                 if (this.GameOver != null)
                     this.GameOver(new object(), new EventArgs());
-				base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+				base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
                 return false;
             }
 
             ///Client sends <ACK>
-            SendMessageThroughSocket(socket, NetworkMessages.ACKNOWLEDGE_TEXT);
+            SendMessageThroughSocket(socket, CommonMessages.ACKNOWLEDGE_TEXT);
 
             ///Server offers symbol selection
             receivedMessage = ListenForMessage(socket);
 
             ///Client sends desired symbol...
-            if (receivedMessage == NetworkMessages.OFFER_DESIRED_SYMBOL_TEXT)
+            if (receivedMessage == CommonMessages.OFFER_DESIRED_SYMBOL_TEXT)
             {
-                string messageToSend = NetworkMessages.REQUEST_SYMBOL_X_TEXT;
+                string messageToSend = CommonMessages.REQUEST_SYMBOL_X_TEXT;
                 if (_desiredSymbol == BoardSymbol.O)
-                    messageToSend = NetworkMessages.REQUEST_SYMBOL_O_TEXT;
+                    messageToSend = CommonMessages.REQUEST_SYMBOL_O_TEXT;
                 if (_twoPlayer)
-                    messageToSend = NetworkMessages.REQUEST_SYMBOL_2_PLAYER;
+                    messageToSend = CommonMessages.REQUEST_SYMBOL_2_PLAYER;
                 SendMessageThroughSocket(socket, messageToSend);
 
                 ///Problem here:  the sequence of messaging has changed (10/25 @ 9:52)
@@ -75,10 +90,10 @@ namespace TicTacToe.Core.Network
                     return true;
 
                 string serverResponse = ListenForMessage(socket);
-
+				NetworkMessage parsedResponse = new NetworkMessage(serverResponse);
                 _desiredSymbol = BoardSymbol.X;
 
-                if (serverResponse == NetworkMessages.REQUEST_SYMBOL_O_TEXT)
+                if (parsedResponse.AnyMessageContains(CommonMessages.REQUEST_SYMBOL_O_TEXT))
                     _desiredSymbol = BoardSymbol.O;
                 
             }
@@ -87,7 +102,7 @@ namespace TicTacToe.Core.Network
                 if (this.GameOver != null)
                     this.GameOver(new object(), new EventArgs());
 
-				base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+				base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
                 return false;
             }
 
@@ -178,7 +193,7 @@ namespace TicTacToe.Core.Network
 
                     if (sleepIterations > 60 * 10) //10 minute timeout
                     {
-						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+						base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
                         return;
                     }
 
@@ -262,7 +277,7 @@ namespace TicTacToe.Core.Network
 
                     if (sleepIterations > 60 * 10) //10 minute timeout
                     {
-						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+						base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
                         return;
                     }
 
@@ -293,7 +308,7 @@ namespace TicTacToe.Core.Network
                     else
                         runOnePlayer(socket, input);
 
-					base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+					base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
 
                 }
                 catch (ArgumentNullException ane)

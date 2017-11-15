@@ -39,19 +39,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Network\InfoClient.cs" />
+    <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\Clients\InfoClient.cs" />
     <Compile Include="Network\InputDevice.cs" />
     <Compile Include="Network\MessageTypes.cs" />
-    <Compile Include="Network\NetworkMessages.cs" />
+    <Compile Include="Network\CommonMessages.cs" />
     <Compile Include="Network\NetworkNode.cs" />
     <Compile Include="Network\ServerLogger.cs" />
     <Compile Include="Network\Servers\BaseServer.cs" />
     <Compile Include="Network\Servers\InfoServer.cs" />
+    <Compile Include="Network\Servers\OnePlayerTicTacToeServer.cs" />
     <Compile Include="Network\Servers\SimpleWebServer.cs" />
     <Compile Include="Network\Servers\TicTacToeServer.cs" />
-    <Compile Include="Network\TicTacToeClient.cs" />
+    <Compile Include="Network\Clients\TicTacToeClient.cs" />
     <Compile Include="Network\NetworkMessage.cs" />
     <Compile Include="Network\Server.cs" />
+    <Compile Include="Network\Servers\TwoPlayerTicTacToeServer.cs" />
     <Compile Include="Network\TicTacToeGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />

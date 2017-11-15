@@ -12,19 +12,30 @@ namespace TicTacToe.Core.Network
 {
     public class Server : NetworkNode
     {
-        public static TicTacToeGameCollection Games = new TicTacToeGameCollection();
+		public event EventHandler ClientConnected;
+		public event EventHandler SocketOpened;
+
+		Socket _mainListener;
+
+		public static TicTacToeGameCollection Games = new TicTacToeGameCollection();
 
         private Services detectRequestedService(Socket socket)
         {            
             string gameInitiationMessage = ListenForMessage(socket);
-            if (gameInitiationMessage == NetworkMessages.TICTACTOE_REQUEST_TEXT)
-                return Services.TicTacToe;
-            if (gameInitiationMessage == NetworkMessages.INFO_REQUEST_TEXT || gameInitiationMessage.Contains(NetworkMessages.PUTTY_CONNECTION_TEXT))
+
+			NetworkMessage message = new NetworkMessage(gameInitiationMessage);
+
+			if (message.AnyMessageContains(CommonMessages.REQUEST_SYMBOL_2_PLAYER) && message.AnyMessageContains(CommonMessages.TICTACTOE_REQUEST_TEXT))
+				return Services.TicTacToeTwoPlayer;
+
+            if (gameInitiationMessage == CommonMessages.TICTACTOE_REQUEST_TEXT)
+                return Services.TicTacToeOnePlayer;
+            if (gameInitiationMessage == CommonMessages.INFO_REQUEST_TEXT || gameInitiationMessage.Contains(CommonMessages.PUTTY_CONNECTION_TEXT))
                 return Services.Info;
-            if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_TEXT.ToUpper()))
+            if (gameInitiationMessage.ToUpper().Contains(CommonMessages.WEB_SERVER_REQUEST_TEXT.ToUpper()))
                 return Services.SimpleWeb;
-            if (gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()) &&
-                gameInitiationMessage.ToUpper().Contains(NetworkMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()))
+            if (gameInitiationMessage.ToUpper().Contains(CommonMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()) &&
+                gameInitiationMessage.ToUpper().Contains(CommonMessages.WEB_SERVER_REQUEST_SPECIFIC_FILE_TEXT_1.ToUpper()))
                 return Services.SimpleWeb;
                             //GET /a.html HTTP/1.1
 
@@ -43,36 +54,45 @@ namespace TicTacToe.Core.Network
                     {
                         Services selectedService = detectRequestedService(socket);
                         BaseServer server = null;
+
+						if (selectedService == Services.Invalid)
+						{
+							base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
+							return;
+						}
+
+						if (selectedService == Services.TicTacToeOnePlayer)
+						{
+							server = new OnePlayerTicTacToeServer();
+						}
+						else if (selectedService == Services.TicTacToeTwoPlayer)
+						{
+							server = new TwoPlayerTicTacToeServer();
+						}
+
+						else if (selectedService == Services.Info)
+						{
+							server = new InfoServer();
+						}
+						else if (selectedService == Services.SimpleWeb)
+						{
+							server = new SimpleWebServer();
+						}
+                        server.CloneHandlers(this, server);
+                        selectedService = server.PerformHandshake(socket);
+
+                        if (selectedService != Services.Invalid)
+                            server.Start(socket);
                         
-                        if(selectedService != Services.Invalid)
-                        {
-                            if (selectedService == Services.TicTacToe)
-                            {
-                                server = new TicTacToeServer();
-                            }
-                            else if(selectedService == Services.Info)
-                            {
-                                server = new InfoServer();
-                            }
-                            else if(selectedService == Services.SimpleWeb)
-                            {
-                                server = new SimpleWebServer();
-                            }
-                            server.CloneHandlers(this, server);
-                            selectedService = server.PerformHandshake(socket);
 
-                            if (selectedService != Services.Invalid)
-                                server.Start(socket);
-                        }
-
-						base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+						base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
 						
 					}
                     catch(Exception ex)
                     {
                         try
                         {
-							base.CloseSocketConnection(socket, NetworkMessages.DISCONNECT_TEXT);
+							base.CloseSocketConnection(socket, CommonMessages.DISCONNECT_TEXT);
 						}
                         catch { }
                         return;
@@ -81,10 +101,65 @@ namespace TicTacToe.Core.Network
             bg.RunWorkerAsync();
 
         }
-        
-        public void Start()
+
+		/// <summary>
+		/// As of right now, this only supports IPV4
+		/// </summary>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public Socket GetListener(int port)
+		{
+			IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+			IPAddress ipAddress = ipHostInfo.AddressList[0];
+
+			foreach (IPAddress a in ipHostInfo.AddressList)
+			{
+				if (a.AddressFamily == AddressFamily.InterNetwork)
+				{
+					ipAddress = a;
+					break;
+				}
+			}
+			IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
+
+			_mainListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			_mainListener.Bind(localEndPoint);
+
+			return _mainListener;
+		}
+
+		public void KillListener()
+		{
+			_mainListener.Close();			
+		}
+
+
+		public Socket OpenApplicationSocket(Socket listener)
+		{
+			if (SocketOpened != null)
+				SocketOpened("Opened application Socket on " + listener.LocalEndPoint.ToString(), new EventArgs());
+
+			Socket socket = listener.Accept();
+
+			if (socket.Connected)
+			{
+				string message = "Opened application socket for client " + socket.RemoteEndPoint.ToString();
+
+				ServerLogger.WriteToLog("CXN", message);
+				if (ClientConnected != null)
+				{
+					ClientConnected(message, new EventArgs());
+				}
+			}
+
+			return socket;
+
+		}
+
+
+		public void Start()
         {
-            Socket listener = base.GetListener(Settings.LISTENING_PORT);
+            Socket listener = GetListener(Settings.LISTENING_PORT);
 
             try
             {
@@ -92,7 +167,7 @@ namespace TicTacToe.Core.Network
                                 
                 while (true)
                 {
-                    Socket socket = base.ListenForConnection(listener);
+                    Socket socket = OpenApplicationSocket(listener);
                     spinupServerThread(socket);                    
                 }
 
@@ -111,6 +186,8 @@ namespace TicTacToe.Core.Network
     public enum Services
     {
         TicTacToe,
+		TicTacToeOnePlayer,
+		TicTacToeTwoPlayer,
         Info,
         SimpleWeb,
         Invalid
